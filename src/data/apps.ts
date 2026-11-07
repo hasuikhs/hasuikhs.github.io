@@ -19,7 +19,6 @@ export type AppInfo = {
   notes: string[];
 };
 
-export const DEVELOPER_NAME = 'khasui';
 export const CONTACT_EMAIL = 'hasuidev@gmail.com';
 
 export const YEOUN: AppInfo = {
@@ -44,6 +43,17 @@ export const YEOUN: AppInfo = {
         '좌석 번호, 출연진(캐스팅)까지 상세하게',
         '별점(0.5 단위)과 감상평으로 그날의 감동을 기록',
         '뮤지컬, 연극, 콘서트, 클래식, 전시까지 카테고리별 정리',
+        '포스터를 크게 보는 2열 보기와 월별 구분선으로 내 티켓을 한눈에',
+      ],
+    },
+    {
+      icon: '📷',
+      title: '티켓 사진으로 빠르게 기록',
+      items: [
+        '티켓을 찍으면 공연명, 일시, 장소, 좌석, 가격을 읽어 빈 칸을 자동 입력',
+        '앨범의 티켓 사진이나 예매 내역 화면 캡처로도 입력',
+        '읽은 정보로 공연 후보를 찾아 고르면 공연 정보에 바로 연결',
+        '사진은 기기 안에서만 처리하고 인식이 끝나면 바로 삭제',
       ],
     },
     {

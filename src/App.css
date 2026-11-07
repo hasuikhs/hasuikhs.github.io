@@ -56,6 +56,11 @@
   color: inherit;
 }
 
+.site-footer__legal {
+  flex-basis: 100%;
+  font-size: 12px;
+}
+
 /* Buttons */
 
 .button {
@@ -87,16 +92,21 @@
   color: var(--accent-text);
 }
 
-.button--secondary {
-  border-color: var(--border);
-  background: var(--surface);
-  color: var(--text);
+/* Clear space around the badge must be at least 1/4 of its height (13px here). */
+.play-badge {
+  display: inline-block;
+  border-radius: 8px;
 }
 
-.button__icon {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
+.play-badge:focus-visible {
+  outline: 2px solid var(--highlight);
+  outline-offset: 2px;
+}
+
+.play-badge__image {
+  display: block;
+  width: auto;
+  height: 52px;
 }
 
 /* Sections */
@@ -114,20 +124,12 @@
 
 /* Hub */
 
-.intro {
+.hub-title {
   padding-top: 72px;
-}
-
-.intro__title {
+  margin-bottom: 28px;
   font-size: clamp(32px, 6vw, 44px);
   font-weight: 800;
   letter-spacing: -0.03em;
-}
-
-.intro__text {
-  margin-top: 12px;
-  color: var(--text-muted);
-  font-size: 17px;
 }
 
 .app-list {
@@ -177,7 +179,8 @@
 .app-card__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
   margin-top: 20px;
 }
 

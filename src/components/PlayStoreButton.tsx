@@ -1,20 +1,25 @@
 type PlayStoreButtonProps = {
   href: string;
-  variant?: 'primary' | 'secondary';
 };
 
-function PlayStoreButton({ href, variant = 'primary' }: PlayStoreButtonProps) {
+// Official artwork from Google Partner Marketing Hub. Use it unmodified.
+const BADGE_SRC = '/badges/google-play-ko.png';
+
+function PlayStoreButton({ href }: PlayStoreButtonProps) {
   return (
     <a
-      className={ `button button--${variant}` }
+      className="play-badge"
       href={ href }
       target="_blank"
       rel="noopener noreferrer"
     >
-      <svg className="button__icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
-      </svg>
-      Google Play에서 받기
+      <img
+        className="play-badge__image"
+        src={ BADGE_SRC }
+        alt="Google Play에서 다운로드"
+        width={ 478 }
+        height={ 142 }
+      />
     </a>
   );
 }
