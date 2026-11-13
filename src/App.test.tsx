@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 
@@ -26,7 +26,8 @@ test('Yeoun page links to the Play Store listing and policies', () => {
     'src',
     '/badges/google-play-ko.png'
   );
-  expect(screen.getByRole('link', { name: '개인정보처리방침' })).toBeInTheDocument();
+  expect(within(screen.getByRole('main')).getByRole('link', { name: '개인정보처리방침' })).toBeInTheDocument();
+  expect(within(screen.getByRole('contentinfo')).getByRole('link', { name: '개인정보처리방침' })).toBeInTheDocument();
 });
 
 test('Yeoun page introduces ticket scanning', () => {

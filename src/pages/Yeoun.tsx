@@ -1,7 +1,9 @@
+import PhoneScreenshot from '../components/PhoneScreenshot';
 import PlayStoreButton from '../components/PlayStoreButton';
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
-import { CONTACT_EMAIL, YEOUN } from '../data/apps';
+import SupportLinks from '../components/SupportLinks';
+import { YEOUN } from '../data/apps';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function Yeoun() {
@@ -13,13 +15,18 @@ function Yeoun() {
       <main>
         <section className="hero">
           <div className="container hero__inner">
-            <img className="hero__icon" src={ YEOUN.iconSrc } alt="" width={ 112 } height={ 112 } />
-            <h1 className="hero__title">{ YEOUN.name }</h1>
-            <p className="hero__tagline">{ YEOUN.tagline }</p>
-            <span className="hero__divider" aria-hidden="true" />
-            <p className="hero__catchphrase">{ YEOUN.catchphrase }</p>
-            <p className="hero__summary">{ YEOUN.summary }</p>
-            <PlayStoreButton href={ YEOUN.playStoreUrl } />
+            <div className="hero__copy">
+              <img className="hero__icon" src={ YEOUN.iconSrc } alt="" width={ 112 } height={ 112 } />
+              <h1 className="hero__title">{ YEOUN.name }</h1>
+              <p className="hero__tagline">{ YEOUN.tagline }</p>
+              <span className="hero__divider" aria-hidden="true" />
+              <p className="hero__catchphrase">{ YEOUN.catchphrase }</p>
+              <p className="hero__summary">{ YEOUN.summary }</p>
+              <PlayStoreButton href={ YEOUN.playStoreUrl } />
+            </div>
+            <div className="hero__media">
+              <PhoneScreenshot dir={ YEOUN.screenshotDir } screenshot={ YEOUN.heroScreenshot } eager />
+            </div>
           </div>
         </section>
 
@@ -28,12 +35,24 @@ function Yeoun() {
             <h2 id="features-heading" className="section__title">주요 기능</h2>
             <ul className="feature-grid">
               { YEOUN.features.map((feature) => (
-                <li key={ feature.title } className="feature-card">
-                  <span className="feature-card__icon" aria-hidden="true">{ feature.icon }</span>
-                  <h3 className="feature-card__title">{ feature.title }</h3>
-                  <ul className="feature-card__items">
-                    { feature.items.map((item) => <li key={ item }>{ item }</li>) }
-                  </ul>
+                <li
+                  key={ feature.title }
+                  className={ `feature-card ${feature.screenshot ? 'feature-card--media' : 'feature-card--compact'}` }
+                >
+                  { feature.screenshot && (
+                    <div className="feature-card__media">
+                      <PhoneScreenshot dir={ YEOUN.screenshotDir } screenshot={ feature.screenshot } />
+                    </div>
+                  ) }
+                  <div className="feature-card__body">
+                    <div className="feature-card__head">
+                      <span className="feature-card__icon" aria-hidden="true">{ feature.icon }</span>
+                      <h3 className="feature-card__title">{ feature.title }</h3>
+                    </div>
+                    <ul className="feature-card__items">
+                      { feature.items.map((item) => <li key={ item }>{ item }</li>) }
+                    </ul>
+                  </div>
                 </li>
               )) }
             </ul>
@@ -52,17 +71,7 @@ function Yeoun() {
 
           <section className="section" aria-labelledby="support-heading">
             <h2 id="support-heading" className="section__title">약관 및 문의</h2>
-            <ul className="link-list">
-              <li>
-                <a href={ YEOUN.privacyPolicyUrl } target="_blank" rel="noopener noreferrer">개인정보처리방침</a>
-              </li>
-              <li>
-                <a href={ YEOUN.termsUrl } target="_blank" rel="noopener noreferrer">이용약관</a>
-              </li>
-              <li>
-                <a href={ `mailto:${CONTACT_EMAIL}` }>문의하기 · { CONTACT_EMAIL }</a>
-              </li>
-            </ul>
+            <SupportLinks app={ YEOUN } variant="list" />
           </section>
         </div>
       </main>

@@ -29,6 +29,10 @@
 }
 
 .site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 8px;
   color: var(--text);
   font-size: 17px;
   font-weight: 700;
@@ -44,20 +48,13 @@
 }
 
 .site-footer__inner {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px 24px;
-  padding-top: 24px;
+  display: grid;
+  gap: 4px;
+  padding-top: 16px;
   padding-bottom: 32px;
 }
 
-.site-footer a {
-  color: inherit;
-}
-
 .site-footer__legal {
-  flex-basis: 100%;
   font-size: 12px;
 }
 
@@ -75,21 +72,15 @@
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  transition: filter 0.15s ease;
 }
 
 .button:hover {
   filter: brightness(1.06);
 }
 
-.button:focus-visible {
-  outline: 2px solid var(--highlight);
-  outline-offset: 2px;
-}
-
 .button--primary {
   background: var(--accent);
-  color: var(--accent-text);
+  color: var(--accent-contrast);
 }
 
 /* Clear space around the badge must be at least 1/4 of its height (13px here). */
@@ -98,15 +89,37 @@
   border-radius: 8px;
 }
 
-.play-badge:focus-visible {
-  outline: 2px solid var(--highlight);
-  outline-offset: 2px;
-}
-
 .play-badge__image {
   display: block;
   width: auto;
   height: 52px;
+}
+
+/* Phone frame around a 9:20 screenshot. Parents size it with --phone-width. */
+
+.phone {
+  position: relative;
+  width: var(--phone-width, 260px);
+  max-width: 100%;
+  padding: 8px;
+  border-radius: 38px;
+  background: var(--phone-bezel);
+  box-shadow: var(--phone-shadow);
+}
+
+.phone__screen {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 9 / 20;
+  border-radius: 30px;
+  background: var(--surface-muted);
+}
+
+.phone__screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Sections */
@@ -139,11 +152,12 @@
 
 .app-card {
   display: flex;
-  gap: 20px;
-  padding: 24px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
   border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--surface);
+  border-radius: 24px;
+  background: var(--card-bg);
   box-shadow: var(--shadow);
 }
 
@@ -159,13 +173,14 @@
 }
 
 .app-card__name {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .app-card__tagline {
   margin-top: 2px;
-  color: var(--link);
+  color: var(--brand-text);
   font-size: 15px;
   font-weight: 600;
 }
@@ -184,38 +199,49 @@
   margin-top: 20px;
 }
 
-@media (max-width: 520px) {
+@media (min-width: 521px) {
   .app-card {
-    flex-direction: column;
-    gap: 16px;
-    padding: 20px;
+    flex-direction: row;
+    gap: 24px;
+    padding: 28px;
   }
 }
 
-/* App detail */
+/* App detail: hero */
 
 .hero {
+  /* Own stacking context so the glow's z-index: -1 stays above the hero background. */
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
   background: var(--hero-bg);
-  color: var(--hero-text);
 }
 
 .hero__inner {
+  display: grid;
+  gap: 48px;
+  padding-top: 56px;
+  padding-bottom: 64px;
+}
+
+.hero__copy {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 72px;
-  padding-bottom: 72px;
+  min-width: 0;
   text-align: center;
 }
 
 .hero__icon {
-  border-radius: 26px;
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
   background: #ffffff;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--icon-shadow);
 }
 
 .hero__title {
-  margin-top: 28px;
+  margin-top: 24px;
   font-size: clamp(44px, 9vw, 64px);
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -233,37 +259,108 @@
   height: 3px;
   margin: 20px 0;
   border-radius: 2px;
-  background: var(--highlight);
+  background: var(--accent);
 }
 
 .hero__catchphrase {
-  color: var(--highlight);
-  font-size: 16px;
+  color: var(--brand-text);
+  font-size: 17px;
+  font-weight: 600;
 }
 
 .hero__summary {
   max-width: 520px;
   margin: 12px 0 32px;
-  color: var(--hero-muted);
+  color: var(--text-muted);
   font-size: 15px;
 }
 
+.hero__media {
+  --phone-width: 280px;
+
+  position: relative;
+  justify-self: center;
+}
+
+/*
+ * Soft warm glow behind the phone; .hero clips it so it never causes scrolling.
+ * z-index: -1 keeps it under the hero copy and the Play badge, never over them.
+ */
+.hero__media::before {
+  position: absolute;
+  z-index: -1;
+  inset: -18% -45%;
+  background: radial-gradient(closest-side, var(--hero-glow), var(--hero-glow-fade));
+  content: '';
+  pointer-events: none;
+}
+
+@media (min-width: 760px) {
+  .hero__inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 56px;
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .hero__copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .hero__icon {
+    width: 112px;
+    height: 112px;
+    border-radius: 26px;
+  }
+
+  .hero__media {
+    --phone-width: 300px;
+  }
+}
+
+/* App detail: feature cards */
+
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .feature-card {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 24px;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
 
+.feature-card__media {
+  --phone-width: 240px;
+
+  display: flex;
+  justify-content: center;
+  padding: 32px 20px;
+  border-bottom: 1px solid var(--border);
+  border-radius: 23px 23px 0 0;
+  background: var(--stage-bg);
+}
+
+.feature-card__body {
+  padding: 24px 20px 28px;
+}
+
+.feature-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .feature-card__icon {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 44px;
@@ -274,13 +371,14 @@
 }
 
 .feature-card__title {
-  margin-top: 16px;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
 }
 
 .feature-card__items {
-  margin-top: 10px;
+  margin-top: 14px;
   color: var(--text-muted);
   font-size: 15px;
 }
@@ -305,6 +403,66 @@
   background: var(--accent);
   content: '';
 }
+
+/* A feature without a screenshot reads as a slim strip, not an empty card. */
+.feature-card--compact {
+  background: var(--stage-bg);
+}
+
+.feature-card--compact .feature-card__icon {
+  background: var(--surface);
+}
+
+@media (min-width: 760px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row dense;
+  }
+
+  .feature-card__body {
+    padding: 28px;
+  }
+
+  /* The lead feature spans the row with the phone beside its text. */
+  .feature-card--media:first-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+  }
+
+  .feature-card--media:first-child .feature-card__media {
+    --phone-width: 260px;
+
+    flex-shrink: 0;
+    align-items: center;
+    padding: 40px 48px;
+    border-right: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: 23px 0 0 23px;
+  }
+
+  .feature-card--media:first-child .feature-card__body {
+    align-self: center;
+    padding: 40px;
+  }
+
+  .feature-card--compact {
+    grid-column: 1 / -1;
+  }
+
+  .feature-card--compact .feature-card__body {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+    gap: 32px;
+    padding: 28px 32px;
+  }
+
+  .feature-card--compact .feature-card__items {
+    margin-top: 0;
+  }
+}
+
+/* App detail: recommendations and notes */
 
 .check-list {
   display: grid;
@@ -335,10 +493,100 @@
   font-size: 15px;
 }
 
-.link-list {
-  display: grid;
-  gap: 12px;
+/* Terms and contact links */
+
+.support-links__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.support-links__detail {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.support-links--list {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.support-links--list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.support-links--list .support-links__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 12px 20px;
+  color: var(--text);
   font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.support-links--list li:first-child .support-links__link {
+  border-radius: 19px 19px 0 0;
+}
+
+.support-links--list li:last-child .support-links__link {
+  border-radius: 0 0 19px 19px;
+}
+
+.support-links--list .support-links__link:hover {
+  background: var(--surface-muted);
+}
+
+.support-links--list .support-links__link:focus-visible {
+  outline-offset: -2px;
+}
+
+.support-links__hint {
+  flex-shrink: 0;
+  color: var(--brand-text);
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Spacing alone separates the links, so nothing dangles when the row wraps. */
+.support-links--inline {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 4px;
+  margin-left: -8px;
+}
+
+.support-links--inline .support-links__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.support-links--inline .support-links__link:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.support-links--inline .support-links__detail {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    transition: filter 0.15s ease;
+  }
+
+  .support-links__link {
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
 }
 
 /* 404 */

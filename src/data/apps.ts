@@ -1,7 +1,15 @@
+// A phone capture served from `${screenshotDir}/${key}-light.jpg` and `-dark.jpg`.
+// Every capture is a 540x1200 portrait JPEG.
+export type AppScreenshot = {
+  key: string;
+  alt: string;
+};
+
 export type AppFeature = {
   icon: string;
   title: string;
   items: string[];
+  screenshot?: AppScreenshot;
 };
 
 export type AppInfo = {
@@ -11,6 +19,8 @@ export type AppInfo = {
   catchphrase: string;
   summary: string;
   iconSrc: string;
+  screenshotDir: string;
+  heroScreenshot: AppScreenshot;
   playStoreUrl: string;
   privacyPolicyUrl: string;
   termsUrl: string;
@@ -29,6 +39,8 @@ export const YEOUN: AppInfo = {
   summary:
     '막이 내린 뒤에도 마음에 오래 남는 순간들이 있습니다. 여운은 그 순간들을 모아두는 개인 공연 기록 다이어리입니다.',
   iconSrc: '/apps/yeoun-icon.png',
+  screenshotDir: '/apps/yeoun/screens',
+  heroScreenshot: { key: 'home', alt: '여운 홈 화면' },
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.hskim.yeoun',
   privacyPolicyUrl:
     'https://app.notion.com/p/Yeoun-372be8bbcaba80089211c1460e4e128d?source=copy_link',
@@ -45,6 +57,7 @@ export const YEOUN: AppInfo = {
         '뮤지컬, 연극, 콘서트, 클래식, 전시까지 카테고리별 정리',
         '포스터를 크게 보는 2열 보기와 월별 구분선으로 내 티켓을 한눈에',
       ],
+      screenshot: { key: 'detail', alt: '여운 티켓 상세 화면' },
     },
     {
       icon: '📷',
@@ -55,6 +68,7 @@ export const YEOUN: AppInfo = {
         '읽은 정보로 공연 후보를 찾아 고르면 공연 정보에 바로 연결',
         '사진은 기기 안에서만 처리하고 인식이 끝나면 바로 삭제',
       ],
+      screenshot: { key: 'add', alt: '여운 티켓 추가 화면' },
     },
     {
       icon: '🔔',
@@ -63,6 +77,7 @@ export const YEOUN: AppInfo = {
         '보러 갈 공연을 미리 등록하면 시작 전에 알림',
         '예매해두고 놓치는 공연이 없도록',
       ],
+      screenshot: { key: 'planned', alt: '여운 관람 예정 공연 화면' },
     },
     {
       icon: '🔍',
@@ -76,6 +91,7 @@ export const YEOUN: AppInfo = {
       icon: '📅',
       title: '캘린더로 한눈에',
       items: ['월간·주간·리스트 3가지 뷰로 관람 일정을 관리'],
+      screenshot: { key: 'calendar', alt: '여운 캘린더 화면' },
     },
     {
       icon: '📊',
@@ -84,6 +100,7 @@ export const YEOUN: AppInfo = {
         '기간별 관람 횟수, 카테고리 비율, 관람 비용까지',
         '숫자로 돌아보는 나의 공연 생활',
       ],
+      screenshot: { key: 'stats', alt: '여운 관람 통계 화면' },
     },
   ],
   recommendedFor: [
