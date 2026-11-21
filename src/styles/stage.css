@@ -139,6 +139,90 @@
   }
 }
 
+/*
+ * Phones: the scroll cue (components/ScrollCue) at the end of the acts' eyebrow row, the row the first screen
+ * ends on, right under the hero ticket. Its 32px target reaches into the row's margins (negative margins), so
+ * the row stays the eyebrow's height and the text lines up with the ticket's right edge.
+ */
+.acts__lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 16px;
+}
+
+.scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin: -8px -8px -8px auto;
+  padding: 0 8px;
+  color: var(--fg-60);
+  font: 500 13px/1.2 var(--sans);
+  text-decoration: none;
+  transition: color 0.3s var(--ease-state);
+}
+
+.scroll-cue__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Gone for good once the reader scrolls: faded, then hidden (out of the tab order). */
+.scroll-cue[data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.4s var(--ease-state),
+    visibility 0s linear 0.4s;
+}
+
+.scroll-cue:active {
+  color: var(--brand-text);
+}
+
+@media (hover: hover) {
+  .scroll-cue:hover {
+    color: var(--brand-text);
+  }
+}
+
+/* One gentle nudge after the cue has come in (its fade starts at 1s), held like the entrances until the fonts
+   are ready. The chevron's stroke sits in the middle of its 16px box, so the 3px nudge stays inside it. */
+.scroll-cue__chevron {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  animation: cue-nudge 1.2s var(--ease-state) 1.8s 1 both;
+  animation-play-state: paused;
+}
+
+.fonts-ready .scroll-cue__chevron {
+  animation-play-state: running;
+}
+
+@keyframes cue-nudge {
+  30% {
+    transform: translateY(3px);
+  }
+
+  60% {
+    transform: none;
+  }
+
+  80% {
+    transform: translateY(1.5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue__chevron {
+    animation: none;
+  }
+}
+
 /* Hero stub: badge, number, sub, stacked like the app stub */
 .ticket--v .hero-stub .stub {
   flex-direction: row;
@@ -537,10 +621,14 @@
 }
 
 /* ---------- Stacked mode ---------- */
+/* Phones (768 and up set their own padding below): the acts follow the hero ticket closely (4px here plus the
+   acts' 24px), so the first screen ends on '주요 기능', the scroll cue and the top of '공연 하나, 세 장면' rather
+   than on blank paper, down to a 360x640 screen. 28px still clears the stub's corner once it has torn off and
+   dropped 18px. */
 .tear[data-mode='stacked'] .tear__ticket {
   max-width: calc(1120px + 2 * var(--g));
   margin: 0 auto;
-  padding: 20px var(--g) 48px;
+  padding: 12px var(--g) 4px;
 }
 
 .tear[data-mode='stacked'] .acts__inner {

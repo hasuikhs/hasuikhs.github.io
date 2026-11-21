@@ -7,6 +7,7 @@ import MaskLines from '../components/MaskLines';
 import PhoneScreenshot from '../components/PhoneScreenshot';
 import PlayStoreButton from '../components/PlayStoreButton';
 import PosterArt from '../components/PosterArt';
+import ScrollCue from '../components/ScrollCue';
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
 import StubLines from '../components/StubLines';
@@ -35,11 +36,13 @@ function Yeoun() {
   const tear = useTearStage();
   const stacked = tear.mode === 'stacked';
   useEntrance('yeoun');
-  useReveal(`${tear.mode}-${isPhone}`);
+  // Phones: what peeks in under the hero ticket ('주요 기능' and the top of its heading) shows from the start.
+  useReveal(`${tear.mode}-${isPhone}`, { revealPeeking: isPhone });
 
   // In the stage the acts are driven by scroll position, so only the stacked page reveals them.
   const actReveal = (style?: Vars) => (stacked ? { 'data-reveal': '', style: style && vars(style) } : {});
   const actRevealLines = stacked ? { 'data-reveal-lines': '' } : {};
+  const actsEyebrow = <p className="acts__eyebrow" { ...actReveal() }>{ YEOUN.actsEyebrow }</p>;
 
   const { acts, archive, closing } = YEOUN;
   const dir = YEOUN.screenshotDir;
@@ -81,10 +84,13 @@ function Yeoun() {
                       </p>
                       <div className="hero__cta appear appear--btn" style={ vars({ '--d': '.72s' }) }>
                         <PlayStoreButton href={ YEOUN.playStoreUrl } height={ isPhone ? 44 : 48 } eager />
-                        <a className="hero__more" href="#acts" onClick={ tear.onActsClick }>
-                          { YEOUN.heroMore }
-                          <ArrowDownIcon />
-                        </a>
+                        { /* Phones: this link is the scroll cue under the ticket instead (acts head, below). */ }
+                        { !isPhone && (
+                          <a className="hero__more" href="#acts" onClick={ tear.onActsClick }>
+                            { YEOUN.heroMore }
+                            <ArrowDownIcon />
+                          </a>
+                        ) }
                       </div>
                     </div>
                   ) }
@@ -108,7 +114,14 @@ function Yeoun() {
             <div className="acts" id="acts">
               <div className="acts__inner container">
                 <div className="acts__head">
-                  <p className="acts__eyebrow" { ...actReveal() }>{ YEOUN.actsEyebrow }</p>
+                  { isPhone ? (
+                    // The first screen ends on this row, right under the hero ticket: the cue at its end says
+                    // the page goes on.
+                    <div className="acts__lead" data-testid="acts-lead">
+                      { actsEyebrow }
+                      <ScrollCue href="#acts" label={ YEOUN.heroScrollCue } onClick={ tear.onActsClick } />
+                    </div>
+                  ) : actsEyebrow }
                   <h2 className={ `acts__title display${stacked ? '' : ' sr-only'}` } { ...actReveal({ '--y': '40px' }) }>
                     { YEOUN.actsHeading }
                   </h2>

@@ -6,6 +6,31 @@ const SELECTOR = '[data-reveal], [data-reveal-lines]';
 // entrance (its buttons start at .72s) instead of before it.
 export const FIRST_SCREEN_DELAY = '0.9s';
 
+// How far an element's own transform moves it down: a hidden [data-reveal] waits --y below its place (App.css).
+// Reads a computed `transform`: 'none', 'matrix(a, b, c, d, x, y)' or 'matrix3d(... x, y, z, w)'.
+export const ownOffsetY = (transform: string) => {
+  const match = /^matrix(3d)?\(([^)]*)\)$/.exec(transform.trim());
+  if (!match) {
+    return 0;
+  }
+  const values = match[2].split(',').map(Number);
+  const y = match[1] ? values[13] : values[5];
+  return Number.isFinite(y) ? y : 0;
+};
+
+type Box = Pick<DOMRect, 'top' | 'bottom' | 'width' | 'height'>;
+
+// On screen where it will rest (its box less its own offset): the top edge above the bottom of the viewport and
+// the bottom edge below its top, so a sliver peeking in at the bottom counts. A box with no size is not drawn.
+export const onScreenAtRest = (box: Box, offsetY: number, viewportH: number) =>
+  (box.width > 0 || box.height > 0) && box.top - offsetY < viewportH && box.bottom - offsetY > 0;
+
+type RevealOptions = {
+  // Phones: the first pass also brings in what peeks in at the bottom of the screen. The observer below leaves
+  // the bottom 10% out, so the next section's heading sat there transparent and the page looked finished.
+  revealPeeking?: boolean;
+};
+
 // One-shot scroll reveal: `.is-in` once an element is 15% inside the viewport
 // (bottom 10% excluded). Without IntersectionObserver everything shows at once.
 // `key` re-scans when the set of revealable elements changes (e.g. the tear's mode).
@@ -13,7 +38,7 @@ export const FIRST_SCREEN_DELAY = '0.9s';
 // On load it waits for `.fonts-ready` on <html> (index.tsx: the display face, at most 1.5s). Revealed
 // earlier, a heading near the top of a tall phone ('공연 하나, 세 장면') showed before the hero and in the
 // fallback face, then swapped faces.
-function useReveal(key?: string) {
+function useReveal(key?: string, { revealPeeking = false }: RevealOptions = {}) {
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR)).filter(
       (el) => !el.classList.contains('is-in')
@@ -31,6 +56,27 @@ function useReveal(key?: string) {
     let mo: MutationObserver | null = null;
 
     const begin = (firstScreen: boolean) => {
+      // With revealPeeking, anything already on screen comes in now, with the rest of the first screen's delay.
+      const later = revealPeeking
+        ? els.filter((el) => {
+          const shown = onScreenAtRest(
+            el.getBoundingClientRect(),
+            ownOffsetY(window.getComputedStyle(el).transform || 'none'),
+            window.innerHeight
+          );
+          if (shown) {
+            if (firstScreen) {
+              el.style.transitionDelay = FIRST_SCREEN_DELAY;
+            }
+            el.classList.add('is-in');
+          }
+          return !shown;
+        })
+        : els;
+      if (later.length === 0) {
+        return;
+      }
+
       let firstBatch = firstScreen;
       io = new IntersectionObserver(
         (entries) => {
@@ -47,7 +93,7 @@ function useReveal(key?: string) {
         },
         { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
       );
-      els.forEach((el) => io?.observe(el));
+      later.forEach((el) => io?.observe(el));
     };
 
     // Waiting only applies to a scripted page load (index.tsx sets `.js`); a later re-scan starts at once.
@@ -69,7 +115,7 @@ function useReveal(key?: string) {
       mo?.disconnect();
       io?.disconnect();
     };
-  }, [ key ]);
+  }, [ key, revealPeeking ]);
 }
 
 export default useReveal;

@@ -106,6 +106,8 @@ export type AppInfo = {
   heroLede: string;
   // Secondary hero button (scrolls to the acts). The hint under the stage ticket is an icon.
   heroMore: string;
+  // Phones: the same link as a quiet scroll cue under the hero ticket (components/ScrollCue).
+  heroScrollCue: string;
   // Decoration only (hidden from screen readers): a ticket for a show tonight.
   heroStub: DatedStub;
   actsEyebrow: string;
@@ -171,6 +173,7 @@ export const YEOUN: AppInfo = {
   heroLede:
     '관람한 공연의 좌석과 캐스팅, 별점과 감상평을 티켓 한 장에 모아 두세요. 보러 갈 공연은 시작 전에 알려 드려요.',
   heroMore: '주요 기능 보기',
+  heroScrollCue: '아래로 넘겨 보기',
   heroStub: { badge: '오늘', dayOffset: 0, sub: '19:30' },
   actsEyebrow: '주요 기능',
   actsHeading: '공연 하나, 세 장면',
