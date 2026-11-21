@@ -20,9 +20,12 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
+    "prestart": "node scripts/legal-docs.js",
     "start": "react-scripts start",
+    "prebuild": "node scripts/legal-docs.js",
     "build": "react-scripts build",
     "postbuild": "node scripts/copy-routes.js",
+    "legal": "node scripts/legal-docs.js",
     "og:card": "sh scripts/og/render.sh",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

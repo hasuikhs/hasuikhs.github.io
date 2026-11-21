@@ -1,6 +1,9 @@
-// Single source for every string and link the pages render.
+// Single source for every string and link the pages render. The legal documents' names, paths and page labels
+// live in src/content/legal/legal.json, which the build scripts read too (scripts/legal-docs.js).
 // Phone captures are served from `${screenshotDir}/${key}-{light,dark}-{540,810}.webp`, with a 540x1200
 // `${key}-{light,dark}.jpg` fallback (see ShotPicture).
+import LEGAL from '../content/legal/legal.json';
+
 export type AppScreenshot = {
   key: string;
   alt: string;
@@ -94,6 +97,7 @@ export type AppInfo = {
   iconSrc: string;
   screenshotDir: string;
   playStoreUrl: string;
+  // A path on this site ('/yeoun/privacy/') opens in place; anything else is an outside link.
   privacyPolicyUrl: string;
   termsUrl: string;
   // Menu across the top of the app page, in page order.
@@ -138,8 +142,8 @@ export const SITE = {
   backToTop: '맨 위로',
   playBadgeAlt: 'Google Play에서 다운로드',
   playTrademark: 'Google Play 및 Google Play 로고는 Google LLC의 상표입니다.',
-  privacyPolicy: '개인정보처리방침',
-  terms: '이용약관',
+  privacyPolicy: LEGAL.documents.privacy.name,
+  terms: LEGAL.documents.terms.name,
   contact: '문의하기',
 };
 
@@ -155,10 +159,9 @@ export const YEOUN: AppInfo = {
   iconSrc: '/apps/yeoun-icon.png',
   screenshotDir: '/apps/yeoun/screens',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.hskim.yeoun',
-  privacyPolicyUrl:
-    'https://app.notion.com/p/Yeoun-372be8bbcaba80089211c1460e4e128d?source=copy_link',
-  termsUrl:
-    'https://app.notion.com/p/Yeoun-3a5be8bbcaba807f81ddd02ac9335575?source=copy_link',
+  // The documents are pages of this site now (src/pages/Legal, src/content/legal), no longer on Notion.
+  privacyPolicyUrl: LEGAL.documents.privacy.path,
+  termsUrl: LEGAL.documents.terms.path,
   nav: [
     { href: '#acts', label: '주요 기능' },
     { href: '#archive', label: '더 많은 기능' },

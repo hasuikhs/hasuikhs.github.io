@@ -1,0 +1,295 @@
+/* ---------- Legal documents: pages/Legal, and the same markup in the served HTML (scripts/legal-docs.js) ---------- */
+
+/* One text column; the header and the footer line up with it. */
+.legal,
+.site-header--text .site-header__inner,
+.legal ~ .site-footer .container {
+  max-width: calc(760px + 2 * var(--g));
+}
+
+.legal {
+  padding-top: 32px;
+}
+
+@media (min-width: 768px) {
+  .legal {
+    padding-top: 56px;
+  }
+}
+
+/* An earlier version: the notice heads the page. Its slot is a status region, so switching to one reads it out. */
+.legal-notice {
+  margin-bottom: 28px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--brand);
+  border-radius: 10px;
+  background: var(--paper-deep);
+  color: var(--fg-80);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.legal-notice strong {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.legal-notice a {
+  display: inline-block;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.legal-doc__title {
+  color: var(--fg);
+  font: 700 clamp(26px, 4.2vw, 34px) / 1.3 var(--sans);
+  letter-spacing: -0.02em;
+}
+
+/* The versions and the link to the other document, under the title. */
+.legal-doc__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+/*
+ * The versions: a labelled group of links (the same markup in the served HTML, so nothing moves when the script
+ * starts), the one shown marked as the current page and drawn as the selected one. The label sits on the first
+ * row's baseline; links that do not fit wrap under the first link, not under the label.
+ */
+.legal-doc__versions {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.legal-doc__label {
+  flex: 0 0 auto;
+  color: var(--fg-60);
+  font: 600 14px/1.2 var(--sans);
+}
+
+.legal-doc__version-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.legal-doc__versions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--brand-text);
+  font: 600 14px/1.3 var(--sans);
+  text-decoration: none;
+  transition: border-color 0.3s var(--ease-state);
+}
+
+.legal-doc__versions a[aria-current='page'] {
+  border-color: var(--brand);
+  background: var(--paper-deep);
+  color: var(--fg);
+}
+
+/* The global focus ring squares corners to 4px; keep the pill's own. */
+.legal-doc__versions a:focus-visible {
+  border-radius: 999px;
+}
+
+.legal-doc__versions a:not([aria-current]):active {
+  border-color: var(--brand-text);
+}
+
+@media (hover: hover) {
+  .legal-doc__versions a:not([aria-current]):hover {
+    border-color: var(--brand-text);
+  }
+}
+
+.legal-doc__other {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--brand-text);
+  font: 600 15px/1.3 var(--sans);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* ---------- The document ---------- */
+.legal-doc__body {
+  margin-top: 24px;
+  color: var(--fg-80);
+  font-size: 16px;
+  line-height: 1.8;
+  overflow-wrap: break-word;
+}
+
+.legal-doc__body > * + * {
+  margin-top: 14px;
+}
+
+/* The date line the document opens with. */
+.legal-doc__body > p:first-child {
+  color: var(--fg-60);
+  font-size: 15px;
+}
+
+.legal-doc__body h2 {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 1px dashed var(--line);
+  color: var(--fg);
+  font: 700 19px/1.45 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.legal-doc__body h3 {
+  margin-top: 32px;
+  color: var(--fg);
+  font: 600 17px/1.5 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.legal-doc__body h2 + *,
+.legal-doc__body h3 + * {
+  margin-top: 12px;
+}
+
+.legal-doc__body strong {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.legal-doc__body a {
+  color: var(--brand-text);
+  text-underline-offset: 3px;
+}
+
+/* Clause numbers are referred to ('제4조 제1항'), so they stay as the reader's numbers. */
+.legal-doc__body ol {
+  padding-left: 1.6em;
+  list-style: decimal;
+}
+
+.legal-doc__body ol > li::marker {
+  color: var(--fg-60);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bullets as real list markers in the brand colour: a list drawn with list-style: none loses its list role in
+   Safari's VoiceOver, and these lists carry the document's structure. */
+.legal-doc__body ul {
+  padding-left: 1.25em;
+  list-style: disc;
+}
+
+.legal-doc__body ul > li::marker {
+  color: var(--brand);
+}
+
+.legal-doc__body li + li,
+.legal-doc__body li > ul,
+.legal-doc__body li > ol {
+  margin-top: 8px;
+}
+
+/* Tables (the processors in the privacy policy). */
+.legal-doc__table {
+  margin-top: 20px;
+}
+
+.legal-doc__table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.legal-doc__table th,
+.legal-doc__table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-doc__table thead th {
+  background: var(--paper-deep);
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.legal-doc__table tbody th {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* Phones: five columns do not fit, so each row is a card, its first cell the title, and every cell under its
+   column's name (data-label). The header row stays for screen readers only. */
+@media (max-width: 767px) {
+  .legal-doc__table table,
+  .legal-doc__table tbody,
+  .legal-doc__table tr,
+  .legal-doc__table th,
+  .legal-doc__table td {
+    display: block;
+  }
+
+  .legal-doc__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .legal-doc__table tr {
+    padding: 14px 16px 16px;
+    border: 1px solid var(--ticket-edge);
+    border-radius: 10px;
+    background: var(--ticket);
+  }
+
+  .legal-doc__table tr + tr {
+    margin-top: 12px;
+  }
+
+  .legal-doc__table th,
+  .legal-doc__table td {
+    padding: 0;
+    border: 0;
+  }
+
+  .legal-doc__table tbody th {
+    font-size: 15px;
+  }
+
+  .legal-doc__table td {
+    margin-top: 10px;
+  }
+
+  /* Every cell's column name above it, the row's own header (the first column) included. */
+  .legal-doc__table th[data-label]::before,
+  .legal-doc__table td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--fg-60);
+    font: 600 12px/1.4 var(--sans);
+    letter-spacing: 0.02em;
+  }
+}

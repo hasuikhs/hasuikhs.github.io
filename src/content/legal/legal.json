@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "여운",
+    "path": "/yeoun/",
+    "backLabel": "여운 소개"
+  },
+  "labels": {
+    "version": "시행일",
+    "effective": "{date} 시행",
+    "current": "{label} (현행)",
+    "previous": "이전 판입니다.",
+    "previousDetail": "현행 {name}은 {date}부터 시행하고 있어요.",
+    "toCurrent": "현행 {name} 보기",
+    "toOther": "{name} 보기"
+  },
+  "documents": {
+    "terms": {
+      "name": "이용약관",
+      "path": "/yeoun/terms/",
+      "versions": [ "2026-11-20", "2026-11-10" ]
+    },
+    "privacy": {
+      "name": "개인정보처리방침",
+      "path": "/yeoun/privacy/",
+      "versions": [ "2026-11-20", "2026-11-10" ]
+    }
+  }
+}

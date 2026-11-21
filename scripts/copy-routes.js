@@ -1,10 +1,13 @@
 // GitHub Pages serves only static files, so a direct hit on a client route
 // (e.g. /yeoun) would 404. Copy the SPA shell into each route directory so it
 // is served with 200, and as 404.html for any unknown path. Each copy carries
-// that page's own title and link-preview tags (see page-meta.js).
+// that page's own title and link-preview tags (see page-meta.js); a legal
+// document's copy also holds the document itself (see legal-docs.js), so it
+// reads without JavaScript.
 const fs = require('fs');
 const path = require('path');
 
+const { staticMarkup } = require('./legal-docs');
 const { PAGES, renderPage } = require('./page-meta');
 
 function writeRoutes(buildDir) {
@@ -13,7 +16,7 @@ function writeRoutes(buildDir) {
   for (const page of Object.values(PAGES)) {
     const file = path.join(buildDir, page.file);
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, renderPage(shell, page));
+    fs.writeFileSync(file, renderPage(shell, page, undefined, page.path ? staticMarkup(page.path) : ''));
   }
 }
 

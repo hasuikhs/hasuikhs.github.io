@@ -19,6 +19,12 @@ const TITLE = /<title>[^<]*<\/title>/g;
 const DESCRIPTION = /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/g;
 const BLOCK = /<!--page-meta-->[\s\S]*?<!--\/page-meta-->/g;
 
+// Markup served inside #root (renderPage `root`), also between markers so a second run replaces it.
+const ROOT_START = '<!--prerendered-->';
+const ROOT_END = '<!--/prerendered-->';
+const ROOT = /<div id="root">(?:<!--prerendered-->[\s\S]*?<!--\/prerendered-->)?<\/div>/g;
+const NOSCRIPT = /<noscript>[\s\S]*?<\/noscript>/g;
+
 const IMAGE_TYPES = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
 
 const escapeHtml = (value) =>
@@ -78,16 +84,28 @@ const countOf = (html, pattern) => (html.match(pattern) || []).length;
 
 // The SPA shell with one page's title, description and tags. Throws when the shell does not hold exactly
 // one <title> and one description, so a changed index.html fails the build instead of shipping no preview.
-function renderPage(shell, page, origin = homepage) {
+// `root` is markup the page shows before its script runs (a legal document, scripts/legal-docs.js): it goes
+// into <div id="root"> between markers, React replaces it on start, and the page drops the <noscript> line
+// that would otherwise say it cannot be read without JavaScript.
+function renderPage(shell, page, origin = homepage, root = '') {
   const html = shell.replace(BLOCK, '');
   if (countOf(html, TITLE) !== 1 || countOf(html, DESCRIPTION) !== 1) {
     throw new Error('page-meta: the shell needs exactly one <title> and one <meta name="description">');
   }
+  if (countOf(html, ROOT) !== 1) {
+    throw new Error('page-meta: the shell needs exactly one <div id="root"></div>');
+  }
   const description = tag('meta', { name: 'description', content: page.description });
   const block = `${START}${metaTags(page, origin).join('')}${END}`;
-  return html
+  const withMeta = html
     .replace(TITLE, () => `<title>${escapeHtml(page.title)}</title>`)
     .replace(DESCRIPTION, () => `${description}${block}`);
+  if (!root) {
+    return withMeta.replace(ROOT, () => '<div id="root"></div>');
+  }
+  return withMeta
+    .replace(NOSCRIPT, '')
+    .replace(ROOT, () => `<div id="root">${ROOT_START}${root}${ROOT_END}</div>`);
 }
 
 module.exports = { PAGES, absoluteUrl, imageVersion, metaTags, renderPage };
