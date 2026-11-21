@@ -1,18 +1,24 @@
 // GitHub Pages serves only static files, so a direct hit on a client route
 // (e.g. /yeoun) would 404. Copy the SPA shell into each route directory so it
-// is served with 200, and as 404.html for any unknown path.
+// is served with 200, and as 404.html for any unknown path. Each copy carries
+// that page's own title and link-preview tags (see page-meta.js).
 const fs = require('fs');
 const path = require('path');
 
-const ROUTES = [ 'yeoun' ];
+const { PAGES, renderPage } = require('./page-meta');
 
-const buildDir = path.join(__dirname, '..', 'build');
-const shell = path.join(buildDir, 'index.html');
-
-for (const route of ROUTES) {
-  const dir = path.join(buildDir, route);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.copyFileSync(shell, path.join(dir, 'index.html'));
+function writeRoutes(buildDir) {
+  // Read once: build/index.html is itself rewritten below, as the hub page.
+  const shell = fs.readFileSync(path.join(buildDir, 'index.html'), 'utf8');
+  for (const page of Object.values(PAGES)) {
+    const file = path.join(buildDir, page.file);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, renderPage(shell, page));
+  }
 }
 
-fs.copyFileSync(shell, path.join(buildDir, '404.html'));
+if (require.main === module) {
+  writeRoutes(path.join(__dirname, '..', 'build'));
+}
+
+module.exports = { writeRoutes };

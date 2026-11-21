@@ -1,0 +1,891 @@
+/* ---------- Shared section type ---------- */
+.section-pad {
+  padding: 72px 0;
+}
+
+.eyebrow {
+  color: var(--brand-text);
+  font: 600 13px/1.2 var(--sans);
+  letter-spacing: 0.02em;
+}
+
+.h2 {
+  color: var(--fg);
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+}
+
+.section-head .h2 {
+  margin-top: 16px;
+}
+
+.lede {
+  color: var(--fg-80);
+  font-size: 16px;
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+}
+
+@media (min-width: 768px) {
+  .section-pad {
+    padding: 112px 0;
+  }
+
+  .lede {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .section-pad {
+    padding: 144px 0;
+  }
+}
+
+/* ---------- Site header ---------- */
+/* Sticky, sliding away while the reader scrolls down (SiteHeader: data-hidden) and back on a scroll up. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  transition: transform 0.3s var(--ease-state);
+}
+
+.site-header[data-hidden] {
+  transform: translateY(-100%);
+}
+
+/* A keyboard reader tabbing into it always sees it, at once: sliding in, it made the browser scroll the
+   page up to the focused link (a mouse click on the switch leaves focus too, so :focus-visible). */
+.site-header:has(:focus-visible) {
+  transform: none;
+  transition: none;
+}
+
+/* Back to top: bottom right, clear of the phone's home bar, once the page is a screen and a half down. */
+.back-to-top {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--ticket-edge);
+  border-radius: 50%;
+  background: var(--ticket);
+  color: var(--fg-80);
+  box-shadow: var(--piece-shadow);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition:
+    opacity 0.25s var(--ease-state),
+    transform 0.25s var(--ease-state),
+    visibility 0s linear 0.25s,
+    color 0.2s var(--ease-state);
+}
+
+.back-to-top[data-visible] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.25s var(--ease-state),
+    transform 0.25s var(--ease-state),
+    visibility 0s,
+    color 0.2s var(--ease-state);
+}
+
+.back-to-top:active {
+  background: var(--paper-deep);
+  color: var(--fg);
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .back-to-top:hover {
+    color: var(--fg);
+  }
+}
+
+@media (min-width: 768px) {
+  .back-to-top {
+    right: calc(28px + env(safe-area-inset-right));
+    bottom: calc(28px + env(safe-area-inset-bottom));
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .back-to-top {
+    transition: none;
+  }
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.site-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--fg);
+  font: 600 15px/1 var(--sans);
+  text-decoration: none;
+}
+
+.site-header__back svg {
+  flex: 0 0 auto;
+}
+
+.site-header__back:active {
+  color: var(--brand-text);
+}
+
+.site-header__end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-header__nav {
+  display: none;
+}
+
+/* Light/dark switch: a 44px target around a 20px icon, in the header or at the top right of a page. */
+.theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -12px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--fg-80);
+  cursor: pointer;
+  transition: color 0.3s var(--ease-state), background-color 0.3s var(--ease-state);
+  /* Kept out of the page's cross-fade (App.css) so the sun and moon move live. */
+  view-transition-name: theme-toggle;
+}
+
+/*
+ * The sky: the sun and the moon on one orbit centred 18px under the icon (22px, 40px), the moon on the far
+ * side and upside down. Each switch turns the orbit another half circle clockwise (--orbit-turn, counted in
+ * ThemeToggle): the body that is up sets to the right below the horizon (a short line at 35px, where the
+ * sky is clipped) and the other comes up from the left, upright.
+ */
+.theme-toggle__sky {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 9px 0);
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 35px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.theme-toggle__orbit {
+  position: absolute;
+  inset: 0;
+  transform-origin: 22px 40px;
+  transform: rotate(var(--orbit-turn, 0deg));
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.theme-toggle__body {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: flex;
+}
+
+.theme-toggle__body--moon {
+  top: 48px;
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__orbit {
+    transition: none;
+  }
+}
+
+/* Pressed (touch has no hover): a paper-deep disc, in the palette instead of the browser's tap highlight. */
+.theme-toggle:active {
+  background: var(--paper-deep);
+  color: var(--fg);
+}
+
+@media (hover: hover) {
+  .theme-toggle:hover {
+    color: var(--fg);
+    background: var(--paper-deep);
+  }
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* Pages without a header (hub, not found) carry the switch alone at the top right. */
+.page-tools {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.site-header__nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--fg-80);
+  font: 500 14px/1 var(--sans);
+  text-decoration: none;
+  transition: color 0.3s var(--ease-state);
+}
+
+.site-header__nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 11px;
+  height: 1px;
+  background: var(--brand-text);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-state);
+}
+
+@media (hover: hover) {
+  .site-header__nav a:hover {
+    color: var(--fg);
+  }
+
+  .site-header__nav a:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+@media (min-width: 768px) {
+  .site-header__inner {
+    height: 64px;
+  }
+
+  .site-header__nav {
+    display: flex;
+    gap: 28px;
+  }
+}
+
+/* ---------- Feature archive ---------- */
+.archive {
+  background: var(--paper);
+}
+
+/* The heading's mask lines pull up 0.14em at the bottom: without this the lede sat on the title. */
+.archive__lede {
+  margin-top: 16px;
+}
+
+.tile-group__label {
+  display: flex;
+  align-items: center;
+  margin: 48px 0 20px;
+  color: var(--fg-80);
+  font: 600 16px/1.4 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.section-head + .tile-group .tile-group__label {
+  margin-top: 40px;
+}
+
+.tile-group__label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  margin-left: 16px;
+  background: var(--line);
+}
+
+/* Columns stay at most 280px (the captures are 540px wide); spare width goes between them, so
+   the row spans the group divider from end to end instead of leaving its right side empty. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 280px));
+  column-gap: 24px;
+  row-gap: 40px;
+  justify-content: space-between;
+}
+
+.tile__poster {
+  transition: transform 0.3s var(--ease-out-quint);
+}
+
+.tile__poster .shot-poster-wrap {
+  height: auto;
+  aspect-ratio: 3 / 4;
+}
+
+.tile__poster .shot-poster img {
+  transition: transform 0.6s var(--ease-out-expo);
+}
+
+@media (hover: hover) {
+  .tile:hover .tile__poster {
+    transform: translateY(-4px);
+  }
+
+  .tile:hover .tile__poster .shot-poster img {
+    transform: scale(1.03);
+  }
+}
+
+.tile__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--fg);
+  font: 600 16px/1.4 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+/* The app's icon for the feature, before its title (tiles and the list under them). It sits on the
+   title's first line (centred in its 1.4em line box), so a title that wraps keeps the icon by its start. */
+.feature-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: calc((1.4em - 20px) / 2);
+  color: var(--brand-text);
+}
+
+.tile__body {
+  max-width: 32ch;
+  margin-top: 6px;
+  color: var(--fg-60);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.tile__meta {
+  margin-top: 8px;
+  color: var(--brand-text);
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 768px) {
+  .tile__title {
+    font-size: 17px;
+  }
+}
+
+/* Small ticket cards on phones, like the app's 내 티켓 list card */
+.tile-cards {
+  display: grid;
+  gap: 12px;
+}
+
+.ticket--tile {
+  --pw: 104px; /* the 9:20 screen at 76px: the card is no taller than its text needs */
+  --rise-pad: 16px 14px 0;
+  --rise-radius: 10px;
+}
+
+/* The poster column of the card: square corners (the ticket frame rounds them). The whole screen shows
+   at 9:20 (about 220px tall at this width); when a long body makes the card taller, the screen keeps its
+   shape on the panel's bottom edge instead of stretching, which would crop the capture's sides. */
+.ticket--tile .ticket__poster .shot-poster-wrap {
+  border-radius: 0;
+}
+
+.ticket--tile .ticket__poster .shot-poster {
+  align-self: flex-end;
+  aspect-ratio: 9 / 20;
+}
+
+.ticket--tile .ticket__body {
+  justify-content: flex-start;
+  padding: 12px;
+}
+
+.ticket--tile .tile__title {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+/* Full text, no line clamp: a feature sentence cut off with an ellipsis reads as unfinished. */
+.ticket--tile .tile__body {
+  max-width: none;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* ---------- Other features: a plain list under the tiles ---------- */
+.feature-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  column-gap: 40px;
+}
+
+.feature-list__item {
+  padding: 16px 0 18px;
+  border-top: 1px dashed var(--line);
+}
+
+/* The feature's icon before the title; the detail lines up with the title text. */
+.feature-list__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--fg);
+  font: 600 16px/1.4 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.feature-list__detail {
+  margin-top: 6px;
+  padding-left: 30px;
+  color: var(--fg-60);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ---------- Before you enter ---------- */
+.notice {
+  background: var(--paper);
+}
+
+/* Notice and curtain call share the paper: one section gap between them, not two. */
+.notice.section-pad {
+  padding-bottom: 0;
+}
+
+/* Phones: the archive ends on the same paper the notice starts on, so one gap there too; and the notice
+   lists (most items wrap) part their items more than their lines. */
+@media (max-width: 767px) {
+  .archive.section-pad {
+    padding-bottom: 0;
+  }
+
+  .notice__list {
+    line-height: 1.6;
+  }
+
+  .notice__list li + li {
+    margin-top: 8px;
+  }
+}
+
+.notice .container {
+  max-width: 960px;
+}
+
+.notice__card {
+  padding: 28px 20px;
+  border: 1px solid var(--ticket-edge);
+  border-radius: 10px;
+  background: var(--ticket);
+  box-shadow: var(--piece-shadow);
+}
+
+.notice__head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.notice__head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  margin-left: 16px;
+  background: var(--line);
+}
+
+.notice__title {
+  color: var(--brand-text);
+  font: 700 13px/1.2 var(--sans);
+  letter-spacing: 0.04em;
+}
+
+.notice__cols {
+  display: grid;
+  gap: 32px;
+}
+
+.notice__col-title {
+  margin-bottom: 12px;
+  color: var(--fg);
+  font: 600 16px/1.4 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.notice__list {
+  counter-reset: notice;
+  color: var(--fg-60);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.notice__list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: baseline;
+  counter-increment: notice;
+}
+
+.notice__list li::before {
+  content: counter(notice, decimal-leading-zero);
+  color: var(--brand-text);
+  font: 700 12px/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .notice__card {
+    padding: 40px 48px;
+  }
+
+  .notice__cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+}
+
+/* ---------- Curtain call, terms and contact ---------- */
+.closing {
+  padding-bottom: 0;
+}
+
+.closing__inner {
+  max-width: calc(760px + 2 * var(--g));
+}
+
+.ticket--closing {
+  --sw: 180px;
+  --hole: 24px;
+}
+
+.ticket--closing .ticket__body {
+  padding: 40px 44px;
+}
+
+.ticket--closing.ticket--v .ticket__body {
+  padding: 24px 20px 28px;
+}
+
+.closing__eyebrow {
+  margin-bottom: 16px;
+}
+
+.closing__sub {
+  margin-top: 16px;
+}
+
+.closing__badge {
+  align-self: flex-start;
+  margin-top: 24px;
+}
+
+.closing-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.ticket--v .closing-stub {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.closing-stub__name {
+  color: var(--fg);
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.micro {
+  color: var(--fg-60);
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.04em;
+}
+
+/* Terms and contact links (footer) */
+.support-links__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Spacing alone separates the footer links, so nothing dangles when the row wraps. */
+.support-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 4px;
+  margin-left: -8px;
+}
+
+.support-links .support-links__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s var(--ease-state);
+}
+
+.support-links .support-links__link:active {
+  color: var(--brand-text);
+}
+
+@media (hover: hover) {
+  .support-links .support-links__link:hover {
+    color: var(--fg);
+    text-decoration: underline;
+  }
+}
+
+.support-links__detail {
+  color: inherit;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  margin-top: 96px;
+  border-top: 1px solid var(--line);
+  color: var(--fg-60);
+  font-size: 14px;
+}
+
+.site-footer__inner {
+  display: grid;
+  gap: 4px;
+  padding-top: 16px;
+  padding-bottom: max(32px, env(safe-area-inset-bottom));
+}
+
+.site-footer__legal {
+  font-size: 12px;
+}
+
+/* ---------- Hub ---------- */
+.hub {
+  max-width: 960px;
+  padding-top: 56px;
+  padding-bottom: 24px;
+}
+
+.hub__title {
+  color: var(--fg);
+  font-size: clamp(36px, 5vw, 52px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.hub__sub {
+  margin-top: 12px;
+  color: var(--fg-60);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.app-list {
+  display: grid;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.ticket--hub {
+  --pw: 168px;
+  --sw: 120px;
+  --hole: 20px;
+
+  min-height: 220px;
+  transition: transform 0.3s var(--ease-out-quint);
+}
+
+.hub-poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--poster-bg);
+}
+
+.hub-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.ticket--hub .ticket__body {
+  padding: 28px 32px;
+}
+
+.hub-card__name {
+  color: var(--fg);
+  font-size: 32px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.hub-card__tagline {
+  margin-top: 4px;
+  color: var(--brand-text);
+  font: 600 15px/1.4 var(--sans);
+}
+
+.hub-card__summary {
+  max-width: 46ch;
+  margin-top: 12px;
+  color: var(--fg-60);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.hub-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+  row-gap: 12px;
+  margin-top: 24px;
+}
+
+.hub-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hub-stub__label {
+  color: var(--brand-text);
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  writing-mode: vertical-rl;
+}
+
+/* Phone: no poster band, the icon heads the body, the stub is one line */
+.ticket--hub.ticket--v .ticket__body {
+  padding: 24px 20px 28px;
+}
+
+.ticket--hub.ticket--v .hub-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  border-radius: 15px;
+}
+
+.ticket--hub .ticket__piece--stub {
+  transform-origin: 0 0;
+  transition: transform 0.35s var(--ease-out-quint);
+}
+
+@media (hover: hover) {
+  .ticket--hub:hover {
+    transform: translateY(-2px);
+  }
+
+  .ticket--hub:not(.ticket--v):hover .ticket__piece--stub {
+    transform: translateX(3px) rotate(1.5deg);
+    filter: var(--stub-lift-shadow);
+  }
+}
+
+@media (min-width: 768px) {
+  .hub {
+    padding-top: 96px;
+  }
+}
+
+/* The hub column is 960 wide; line the footer up with it. */
+.hub ~ .site-footer .container {
+  max-width: 960px;
+}
+
+/* ---------- 404 ---------- */
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding-top: 96px;
+  color: var(--fg-60);
+}
+
+.not-found__title {
+  color: var(--fg);
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket--hub,
+  .ticket--hub .ticket__piece--stub,
+  .tile__poster,
+  .tile__poster .shot-poster img,
+  .site-header__nav a,
+  .site-header__nav a::after {
+    transition-duration: 0.01s !important;
+  }
+
+  /* Hover only changes colour */
+  .ticket--hub:hover,
+  .ticket--hub:hover .ticket__piece--stub,
+  .tile:hover .tile__poster,
+  .tile:hover .tile__poster .shot-poster img,
+  .btn:hover,
+  .hero__more:hover svg {
+    transform: none !important;
+  }
+}

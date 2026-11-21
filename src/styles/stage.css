@@ -1,0 +1,705 @@
+/*
+ * The tear: hero ticket + three acts.
+ * data-mode="stage"   sticky scroll stage (>=1024 x >=600, motion allowed; STAGE_QUERY in useTearStage)
+ * data-mode="stacked" ordinary flow with a one-time tear (phones, tablets, reduced motion)
+ */
+
+/* Hero ticket sizes */
+.ticket--hero {
+  --pw: 0px;
+  --sw: 160px;
+  --hole: 24px;
+}
+
+.ticket--hero .ticket__poster {
+  display: none;
+}
+
+.ticket--hero .ticket__body {
+  padding: 32px;
+}
+
+.ticket--hero.ticket--v {
+  --hole: 20px;
+}
+
+.ticket--hero.ticket--v .ticket__poster {
+  display: block;
+}
+
+.ticket--hero.ticket--v .ticket__body {
+  padding: 24px 20px 28px;
+}
+
+@media (min-width: 1024px) {
+  .ticket--hero {
+    --pw: 200px;
+    --sw: 180px;
+    --hole: 28px;
+  }
+
+  .ticket--hero .ticket__poster {
+    display: block;
+  }
+
+  .ticket--hero .ticket__body {
+    padding: 40px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .ticket--hero {
+    --pw: 280px;
+    --sw: 220px;
+  }
+
+  .ticket--hero .ticket__body {
+    padding: 48px 48px 48px 52px;
+  }
+}
+
+/* Hero copy */
+.hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  color: var(--brand-text);
+  font: 600 13px/1.2 var(--sans);
+  letter-spacing: 0.02em;
+}
+
+.hero__eyebrow::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.hero__title {
+  color: var(--fg);
+  font-size: clamp(34px, 4.6vw, 60px);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+}
+
+.hero__lede {
+  max-width: 30em;
+  margin-top: 20px;
+  color: var(--fg-80);
+  font-size: 16px;
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+}
+
+.hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+  row-gap: 12px;
+  margin-top: 28px;
+}
+
+.hero__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--fg-80);
+  font: 600 15px/1 var(--sans);
+  text-decoration: none;
+  transition: color 0.3s var(--ease-state);
+}
+
+.hero__more svg {
+  flex: 0 0 auto;
+  transition: transform 0.3s var(--ease-state);
+}
+
+.hero__more:active {
+  color: var(--brand-text);
+}
+
+@media (hover: hover) {
+  .hero__more:hover {
+    color: var(--brand-text);
+  }
+
+  .hero__more:hover svg {
+    transform: translateY(2px);
+  }
+}
+
+@media (min-width: 768px) {
+  .hero__lede {
+    font-size: 17px;
+  }
+}
+
+/* Hero stub: badge, number, sub, stacked like the app stub */
+.ticket--v .hero-stub .stub {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.ticket--v .hero-stub .stub__num {
+  font-size: 24px;
+}
+
+/* Hint under the stage ticket: a dashed tear line and a chevron that nudges down (48px tall). */
+.tear__hint {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--cy) + var(--th) / 2 + 18px);
+  z-index: 3;
+  margin: 0;
+  transform: translateX(-50%);
+  opacity: var(--hint-o, 1);
+  pointer-events: none;
+}
+
+.tear__hint-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--fg-60);
+}
+
+.tear__hint-inner::before {
+  content: '';
+  width: 1px;
+  height: 24px;
+  background: repeating-linear-gradient(to bottom, var(--perf) 0 4px, #0000 4px 8px);
+}
+
+/* The chevron's stroke sits in the top 14px of its 20px box, so the 6px nudge stays inside it. */
+.tear__hint-chevron {
+  display: block;
+  animation: hint-nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes hint-nudge {
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tear__hint-chevron {
+    animation: none;
+  }
+}
+
+/* ---------- Stage mode ---------- */
+.tear__stage {
+  --phone-o: 0;
+  --phone-s: 0.94;
+}
+
+.tear[data-mode='stage'] {
+  position: relative;
+  height: calc(100vh + 280vh);
+  height: calc(100dvh + 280vh);
+}
+
+/*
+ * --cy is the ticket's vertical centre. On the first screen the stage starts below the 65px
+ * header and the hint hangs under the ticket (18px gap + 50px kept for the 48px hint), so both
+ * have to fit in 100dvh - 65px: the ticket keeps 32px under the header and the hint 16px above
+ * the bottom edge (--th = 100dvh - 65 - 32 - 68 - 16, capped at 560). The centre lifts by half the header,
+ * or by more when the hint would otherwise fall off a short screen (149px = 65 + 68 + 16).
+ * --cy-k (set from scroll) runs 1 -> 0 as the header scrolls away; once the stage is stuck the
+ * ticket sits in the true middle. From 800px tall the lift is the plain half header.
+ */
+.tear[data-mode='stage'] .tear__stage {
+  --th: min(560px, calc(100dvh - 181px));
+  --cy-lift: max(calc(32px * var(--cy-k, 1)), calc((149px + var(--th) / 2 - 50%) * var(--cy-k, 1)));
+  --cy: calc(50% - var(--cy-lift));
+
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.tear[data-mode='stage'] .tear__ticket {
+  position: absolute;
+  left: 50%;
+  top: var(--cy);
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  width: min(1120px, calc(100% - 2 * var(--g)));
+  height: var(--th);
+}
+
+.tear[data-mode='stage'] .ticket__enter,
+.tear[data-mode='stage'] .ticket--hero {
+  height: 100%;
+}
+
+.tear[data-mode='stage'] .ticket__piece--main {
+  transform: translate3d(var(--dxL, 0px), 0, 0) rotate(var(--rotL, 0deg));
+  transform-origin: 100% 0;
+  will-change: transform;
+}
+
+/*
+ * As the ticket opens, the main piece narrows from its left end by --pc (see useTearStage):
+ * the stub stays put (flex-end) and the face contents slide out under the left edge, so the
+ * poster band leaves first and the body keeps its width.
+ */
+.tear[data-mode='stage'] .ticket--hero {
+  justify-content: flex-end;
+}
+
+.tear[data-mode='stage'] .ticket--hero .ticket__piece--main {
+  flex: 0 0 calc(100% - var(--sw) - var(--pc, 0px));
+}
+
+.tear[data-mode='stage'] .ticket--hero .ticket__poster {
+  margin-left: calc(var(--pc, 0px) * -1);
+}
+
+.tear[data-mode='stage'] .ticket__piece--stub {
+  transform: translate3d(var(--dxR, 0px), 0, 0) rotate(var(--rotR, 0deg));
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* The copy holds the Play badge: undo the piece's tilt so the badge only fades and moves. */
+.tear[data-mode='stage'] .hero-copy {
+  opacity: var(--hero-o, 1);
+  transform: translate3d(0, var(--hero-y, 0px), 0) rotate(calc(var(--rotL, 0deg) * -1));
+}
+
+.tear[data-mode='stage'] .hero-stub {
+  opacity: var(--hero-o, 1);
+}
+
+/* No z-index on .acts or .act: phones (z 0/1) layer under the ticket (z 2), copy and stubs (z 3) over it. */
+.tear[data-mode='stage'] .acts {
+  position: absolute;
+  inset: 0;
+}
+
+.tear[data-mode='stage'] .acts__eyebrow {
+  display: none;
+}
+
+.tear[data-mode='stage'] .act {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tear[data-mode='stage'] .act__copy {
+  position: absolute;
+  z-index: 3;
+  left: var(--copy-left);
+  width: var(--copy-w);
+  top: var(--cy);
+  transform: translateY(-50%);
+}
+
+.tear[data-mode='stage'] .act__phone-wrap {
+  position: absolute;
+  left: var(--phone-left);
+  top: var(--cy);
+  z-index: 0;
+  opacity: var(--phone-o, 0);
+  transform: translateY(-50%) scale(var(--phone-s, 0.94));
+  transform-origin: 50% 50%;
+}
+
+/* The incoming act's phone sits over the outgoing one, which holds and then drops. */
+.tear[data-mode='stage'] .act.is-active .act__phone-wrap {
+  z-index: 1;
+}
+
+.tear[data-mode='stage'] .act__phone-wrap .phone {
+  height: calc(var(--th) - 32px);
+  width: calc((var(--th) - 48px) * 9 / 20 + 16px);
+}
+
+.tear[data-mode='stage'] .act__stub {
+  position: absolute;
+  z-index: 3;
+  left: var(--stub-left);
+  width: var(--sw);
+  top: var(--cy);
+  height: var(--th);
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* The scene wrapper draws no box in the stage: the stub places itself. */
+.tear[data-mode='stage'] .act__stubs {
+  display: contents;
+}
+
+/* Leaving an act, its stub fades out over 0.25s (Act change, below): hold the scene's end until then
+   instead of snapping back to its start ('오늘') on the way out. Its start returns once it is gone. */
+.tear[data-mode='stage'] [data-scene='armed'] .stub__flip-front,
+.tear[data-mode='stage'] [data-scene='armed'] .stub__flip-back,
+.tear[data-mode='stage'] [data-scene='armed'] .stub__roll-strip {
+  transition:
+    opacity 0s linear 0.25s,
+    transform 0s linear 0.25s;
+}
+
+/* Act one comes in while the tear opens: its copy rides the main piece (translate, so the
+   entrance transitions on transform/opacity never lag it) and its stub waits for data-open. */
+.tear[data-mode='stage'] .act__copy {
+  translate: var(--copy-dx, 0px) 0;
+}
+
+/* Act change */
+.act__phone {
+  position: relative;
+}
+
+.tear[data-mode='stage'] .act__phone {
+  opacity: 0;
+  transition: opacity 0s linear 0.5s; /* leaving: hold, then drop */
+}
+
+.tear[data-mode='stage'] .act.is-active .act__phone {
+  opacity: 1;
+  z-index: 2;
+  transition: opacity 0.5s ease;
+}
+
+.tear[data-mode='stage'] [data-act='0'] .act--1 .act__phone {
+  opacity: 1; /* phone visible while the tear opens */
+}
+
+.tear[data-mode='stage'] .act__copy,
+.tear[data-mode='stage'] .act__stub {
+  opacity: 0;
+  transform: translate3d(0, -8px, 0) translateY(-50%);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.tear[data-mode='stage'] .act.is-active .act__copy,
+.tear[data-mode='stage'] [data-open='1'] .act.is-active .act__stub {
+  opacity: 1;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.6s var(--ease-out-expo) 0.2s,
+    transform 0.6s var(--ease-out-expo) 0.2s;
+}
+
+/* While the ticket opens, act one's copy cross-fades with the hero copy on the scroll itself
+   (--act1-o), not on a timer, so the main piece never stands blank between the two. Once open,
+   act one fades in and out on act changes like the others. */
+.tear[data-mode='stage'] [data-open='0'] .act--1.is-active .act__copy {
+  opacity: var(--act1-o, 1);
+  transition: transform 0.6s var(--ease-out-expo) 0.2s;
+}
+
+.tear[data-mode='stage'] .act .mask-line > span {
+  animation: none;
+  transform: translateY(110%);
+  transition: transform 0.25s ease;
+}
+
+.tear[data-mode='stage'] .act.is-active .mask-line > span {
+  transform: none;
+  transition: transform 0.7s var(--ease-out-quint) calc(var(--i, 0) * 80ms);
+}
+
+.tear[data-mode='stage'] .act__body,
+.tear[data-mode='stage'] .act__points {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.tear[data-mode='stage'] .act.is-active .act__body,
+.tear[data-mode='stage'] .act.is-active .act__points {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.6s var(--ease-out-expo) 0.2s,
+    transform 0.6s var(--ease-out-expo) 0.2s;
+}
+
+.tear[data-mode='stage'] .act.is-active .act__points {
+  transition-delay: 0.28s;
+}
+
+/* Act bars: which of the three scenes is showing */
+.act__bars {
+  display: flex;
+  gap: 6px;
+  margin-top: 32px;
+}
+
+.act__bar {
+  width: 24px;
+  height: 2px;
+  background: var(--line);
+  transition: width 0.4s var(--ease-state);
+}
+
+.act__bar.is-current {
+  background: var(--brand);
+}
+
+.tear[data-mode='stage'] .act.is-active .act__bar.is-current {
+  width: 40px;
+}
+
+.tear[data-mode='stacked'] .act__bars,
+.tear[data-mode='stacked'] .tear__hint {
+  display: none;
+}
+
+/* ---------- Act copy (both modes) ---------- */
+.acts {
+  scroll-margin-top: 0; /* html scroll-padding-top already clears the sticky header */
+}
+
+.acts__eyebrow,
+.act__label {
+  color: var(--brand-text);
+  font: 600 13px/1.2 var(--sans);
+  letter-spacing: 0.02em;
+}
+
+.acts__title {
+  margin-top: 16px;
+  color: var(--fg);
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+}
+
+.act__label {
+  margin-bottom: 20px;
+}
+
+.act__title {
+  color: var(--fg);
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.24;
+  letter-spacing: -0.01em;
+}
+
+.act__title:focus {
+  outline: none;
+}
+
+.act__body {
+  max-width: 30em;
+  margin-top: 20px;
+  color: var(--fg-60);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.act__points {
+  display: grid;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--fg-80);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.act__points li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.act__points li::before {
+  content: '';
+  position: absolute;
+  top: 0.78em;
+  left: 0;
+  width: 10px;
+  height: 2px;
+  background: var(--brand);
+}
+
+/* ---------- Stacked mode ---------- */
+.tear[data-mode='stacked'] .tear__ticket {
+  max-width: calc(1120px + 2 * var(--g));
+  margin: 0 auto;
+  padding: 20px var(--g) 48px;
+}
+
+.tear[data-mode='stacked'] .acts__inner {
+  padding-top: 24px;
+}
+
+.tear[data-mode='stacked'] .act {
+  position: relative;
+  padding: 72px 0;
+}
+
+.tear[data-mode='stacked'] .acts__head + .act {
+  margin-top: 8px;
+}
+
+.tear[data-mode='stacked'] .act + .act {
+  border-top: 1px dashed var(--line);
+}
+
+/* Phones: the next section pads its own top, so the last act does not add a second gap under it. */
+@media (max-width: 767px) {
+  .tear[data-mode='stacked'] .act:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.tear[data-mode='stacked'] .act__phone-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.tear[data-mode='stacked'] .act__phone-wrap .phone {
+  --phone-width: min(72vw, 280px);
+}
+
+/* Phones: a smaller phone (200px, 52vw at 360) so each act's copy and screen fit about one screen, with
+   the bezel and corners scaled to match. */
+@media (max-width: 767px) {
+  .tear[data-mode='stacked'] .act__phone-wrap .phone {
+    --phone-width: min(52vw, 200px);
+    padding: 6px;
+    border-radius: 29px;
+  }
+
+  .tear[data-mode='stacked'] .act__phone-wrap .phone__screen {
+    border-radius: 23px;
+  }
+}
+
+.tear[data-mode='stacked'] .act__stubs {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .tear[data-mode='stacked'] .tear__ticket {
+    padding: 32px var(--g) 64px;
+  }
+
+  .tear[data-mode='stacked'] .act {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-rows: auto auto;
+    column-gap: 64px;
+    row-gap: 28px;
+    align-items: center;
+    padding: 96px 0;
+  }
+
+  .tear[data-mode='stacked'] .act__copy {
+    grid-area: 1 / 1;
+    align-self: end;
+  }
+
+  .tear[data-mode='stacked'] .act__phone-wrap {
+    grid-area: 1 / 2 / 3 / 3;
+    margin-top: 0;
+  }
+
+  .tear[data-mode='stacked'] .act__phone-wrap .phone {
+    --phone-width: 280px;
+  }
+
+  /* The sample stub as a small torn-off stub under the copy (the wrapper holds its scene state). */
+  .tear[data-mode='stacked'] .act__stubs {
+    grid-area: 2 / 1;
+    align-self: start;
+    justify-self: start;
+    display: grid;
+  }
+
+  .tear[data-mode='stacked'] .act__stub {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border: 1px solid var(--ticket-edge);
+    border-left: 2px dashed var(--perf);
+    border-radius: 0 8px 8px 0;
+    background: var(--ticket);
+    box-shadow: var(--piece-shadow);
+  }
+
+  .tear[data-mode='stacked'] .act__stub .stub {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .tear[data-mode='stacked'] .act__stub .stub__num {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tear[data-mode='stacked'] .ticket--hero {
+    min-height: 480px;
+  }
+}
+
+/* One-time tear in stacked mode: the dashes rewind, then the stub drops and the edge scallops. */
+.ticket--hero .ticket__piece--stub {
+  transform-origin: 0 0;
+}
+
+.is-dropped .ticket__perf {
+  transform: scaleY(0);
+  transition: transform 0.35s linear;
+}
+
+.ticket--v.is-dropped .ticket__perf {
+  transform: scaleX(0);
+}
+
+.is-dropped .ticket__piece--stub {
+  transform: translate(16px, 8px) rotate(2.5deg);
+  transition: transform 0.9s var(--ease-out-expo) 0.3s;
+  /* The ticket's one shadow does not fall on the main piece where the dropped stub overlaps it: a small
+     shadow of its own keeps the torn edge and the hole readable there. */
+  filter: var(--stub-lift-shadow);
+}
+
+.ticket--v.is-dropped .ticket__piece--stub {
+  transform: translate(6px, 18px) rotate(-2.5deg);
+}
+
+/* Phones: the same tear in about .85s (the dashes rewind faster and the drop starts sooner). */
+@media (max-width: 767px) {
+  .ticket--v.is-dropped .ticket__perf {
+    transition-duration: 0.2s;
+  }
+
+  .ticket--v.is-dropped .ticket__piece--stub {
+    transition: transform 0.7s var(--ease-out-expo) 0.15s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket--draw .ticket__perf {
+    animation: none !important;
+  }
+}

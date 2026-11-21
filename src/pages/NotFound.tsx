@@ -1,17 +1,30 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 
 import SiteFooter from '../components/SiteFooter';
+import ThemeToggle from '../components/ThemeToggle';
+import { NOT_FOUND } from '../data/apps';
+import PAGE_META from '../data/pageMeta.json';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import useEntrance from '../hooks/useEntrance';
+
+const delay = (d: string) => ({ '--d': d } as CSSProperties);
 
 function NotFound() {
-  useDocumentTitle('페이지를 찾을 수 없습니다');
+  useDocumentTitle(PAGE_META.notFound.title);
+  useEntrance('not-found');
 
   return (
     <>
+      <div className="container page-tools appear appear--soft">
+        <ThemeToggle />
+      </div>
       <main className="container not-found">
-        <h1 className="not-found__title">페이지를 찾을 수 없습니다</h1>
-        <p>주소가 바뀌었거나 없는 페이지예요.</p>
-        <Link className="button button--primary" to="/">처음으로</Link>
+        <h1 className="not-found__title display appear appear--soft">{ NOT_FOUND.title }</h1>
+        <p className="appear appear--soft" style={ delay('.1s') }>{ NOT_FOUND.body }</p>
+        <div className="appear appear--soft" style={ delay('.2s') }>
+          <Link className="btn" to="/">{ NOT_FOUND.homeLink }</Link>
+        </div>
       </main>
       <SiteFooter />
     </>

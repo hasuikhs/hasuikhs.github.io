@@ -1,607 +1,425 @@
+/*
+ * Tokens: the Yeoun app palette only (cinematic / brand / spotlight / ink scales).
+ * Spotlight (#e0b85a) is for stars and badges and nothing else.
+ */
+html,
+body {
+  background: var(--paper);
+  color: var(--fg);
+}
+
+:root {
+  --paper: #fbf6ee; /* cinematic-50  page */
+  --paper-deep: #f2e5d2; /* cinematic-100 alt section */
+  --line: #e3cdaf; /* cinematic-200 hairlines */
+  --ticket: #ffffff; /* app card bg-white */
+  --ticket-edge: #f2e5d2; /* app card border cinematic-100 */
+  --perf: #e3cdaf; /* perforation dashes (app uses 100; 200 reads at page scale) */
+  --fg: #1c1510; /* cinematic-900 */
+  --fg-80: #3f3229; /* cinematic-700 */
+  --fg-60: #564539; /* cinematic-600 */
+  --fg-40: #74604e; /* cinematic-500, 14px and up only */
+  --brand: #d18654; /* brand-500 fills, active bars, bullets */
+  --brand-text: #8a5538; /* brand-700 brand text on light, 5.6:1 */
+  --on-brand: #1c1510; /* text on brand fill, 6.2:1 */
+  --spot: #e0b85a; /* spotlight-300 stars and badges only */
+  --on-spot: #1c1510;
+  --focus: #8a5538;
+  --poster-bg: #fce5d2;
+  --poster-icon-shadow: 0 14px 30px rgba(69, 42, 32, 0.18);
+  --poster-screen-shadow: 0 10px 28px rgba(69, 42, 32, 0.16);
+  --poster-line: #efaa78;
+  --poster-ink: #452a20;
+  --poster-ink-2: #8a5538;
+  --bezel: #1c1510;
+  --piece-shadow: 0 1px 2px rgba(28, 21, 16, 0.06), 0 24px 48px -28px rgba(28, 21, 16, 0.3);
+  /* A stub lifted off its ticket (dropped, or tilted on hover) over the main piece. */
+  --stub-lift-shadow: drop-shadow(-1px 1px 1.5px rgba(28, 21, 16, 0.22));
+  /* A ticket's shadow: a filter, so it follows the punch holes and torn edges cut out of its faces. */
+  --ticket-shadow: drop-shadow(0 1px 1px rgba(28, 21, 16, 0.07)) drop-shadow(0 14px 16px rgba(28, 21, 16, 0.12));
+  --grain-opacity: 0.4;
+
+  --sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Noto Sans KR', 'Segoe UI', sans-serif;
+  /* Display face for headings and names (src/lib/displayFont.ts). A glyph outside its subset falls back to the body sans. */
+  --display: 'Gowun Dodum', var(--sans);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-reveal: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
+  --g: 16px; /* page gutter */
+
+  color-scheme: light;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --g: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --g: 48px;
+  }
+}
+
+/* Dark tokens: on <html data-theme="dark">, set from the stored choice or the system (src/lib/theme.ts). */
+:root[data-theme='dark'] {
+  --paper: #0d0d0d; /* ink-950 */
+  --paper-deep: #1a1a1a; /* ink-900 */
+  --line: #2e2e2e; /* ink-800 */
+  --ticket: #1a1a1a; /* app dark card ink-900 */
+  --ticket-edge: #2e2e2e;
+  --perf: #2e2e2e; /* app dark tear line ink-800 */
+  --fg: #fafafa;
+  --fg-80: #e5e5e5;
+  --fg-60: #a3a3a3;
+  --fg-40: #a3a3a3; /* ink-500 #737373 is 4.1:1, never for text */
+  --brand: #d18654;
+  --brand-text: #efaa78; /* brand-300 */
+  --on-brand: #1c1510;
+  --focus: #efaa78;
+  --poster-bg: #2e2e2e; /* ink 800/700/50/400: no brown tint on dark */
+  --poster-icon-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  --poster-screen-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  --poster-line: #404040;
+  --poster-ink: #fafafa;
+  --poster-ink-2: #a3a3a3;
+  --bezel: #2e2e2e;
+  /* The ticket lifts off the page in dark too (2026-11-21 owner); on ink-950 it has to be this deep to show. */
+  --piece-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -16px rgba(0, 0, 0, 1);
+  --ticket-shadow: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6)) drop-shadow(0 18px 24px rgba(0, 0, 0, 0.9));
+  --stub-lift-shadow: drop-shadow(-1px 1px 1.5px rgba(0, 0, 0, 0.6));
+  --grain-opacity: 0.25;
+
+  color-scheme: dark;
+}
+
+/* Theme switch (lib/theme switchTheme): the old page fades into the new one; the switch itself is left out
+   of the fade so its sun and moon keep moving. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.45s;
+  animation-timing-function: var(--ease-state);
+}
+
+::view-transition-group(theme-toggle),
+::view-transition-new(theme-toggle) {
+  animation: none;
+}
+
+::view-transition-old(theme-toggle) {
+  display: none;
+}
+
+::selection {
+  background: rgba(209, 134, 84, 0.3);
+  color: inherit;
+}
+
+/* Root */
+
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip; /* never overflow:hidden, it would kill position:sticky */
 }
 
 .app > main {
-  flex: 1;
+  flex: 1 0 auto;
 }
 
 .container {
   width: 100%;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--g);
 }
 
-/* Header / footer */
-
-.site-header {
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-}
-
-.site-header__inner {
-  display: flex;
-  align-items: center;
-  height: 56px;
-}
-
-.site-header__brand {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  border-radius: 8px;
-  color: var(--text);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-}
-
-.site-footer {
-  margin-top: 80px;
-  border-top: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.site-footer__inner {
-  display: grid;
-  gap: 4px;
-  padding-top: 16px;
-  padding-bottom: 32px;
-}
-
-.site-footer__legal {
-  font-size: 12px;
-}
-
-/* Buttons */
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.button:hover {
-  filter: brightness(1.06);
-}
-
-.button--primary {
-  background: var(--accent);
-  color: var(--accent-contrast);
-}
-
-/* Clear space around the badge must be at least 1/4 of its height (13px here). */
-.play-badge {
-  display: inline-block;
-  border-radius: 8px;
-}
-
-.play-badge__image {
-  display: block;
-  width: auto;
-  height: 52px;
-}
-
-/* Phone frame around a 9:20 screenshot. Parents size it with --phone-width. */
-
-.phone {
-  position: relative;
-  width: var(--phone-width, 260px);
-  max-width: 100%;
-  padding: 8px;
-  border-radius: 38px;
-  background: var(--phone-bezel);
-  box-shadow: var(--phone-shadow);
-}
-
-.phone__screen {
-  display: block;
-  overflow: hidden;
-  aspect-ratio: 9 / 20;
-  border-radius: 30px;
-  background: var(--surface-muted);
-}
-
-.phone__screen img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Sections */
-
-.section {
-  margin-top: 56px;
-}
-
-.section__title {
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-/* Hub */
-
-.hub-title {
-  padding-top: 72px;
-  margin-bottom: 28px;
-  font-size: clamp(32px, 6vw, 44px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.app-list {
-  display: grid;
-  gap: 16px;
-}
-
-.app-card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  background: var(--card-bg);
-  box-shadow: var(--shadow);
-}
-
-.app-card__icon {
-  flex-shrink: 0;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px var(--border);
-}
-
-.app-card__body {
-  min-width: 0;
-}
-
-.app-card__name {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.app-card__tagline {
-  margin-top: 2px;
-  color: var(--brand-text);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.app-card__summary {
-  margin-top: 12px;
-  color: var(--text-muted);
-  font-size: 15px;
-}
-
-.app-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-}
-
-@media (min-width: 521px) {
-  .app-card {
-    flex-direction: row;
-    gap: 24px;
-    padding: 28px;
-  }
-}
-
-/* App detail: hero */
-
-.hero {
-  /* Own stacking context so the glow's z-index: -1 stays above the hero background. */
-  isolation: isolate;
-  overflow: hidden;
-  border-bottom: 1px solid var(--border);
-  background: var(--hero-bg);
-}
-
-.hero__inner {
-  display: grid;
-  gap: 48px;
-  padding-top: 56px;
-  padding-bottom: 64px;
-}
-
-.hero__copy {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 0;
-  text-align: center;
-}
-
-.hero__icon {
-  width: 96px;
-  height: 96px;
-  border-radius: 22px;
-  background: #ffffff;
-  box-shadow: var(--icon-shadow);
-}
-
-.hero__title {
-  margin-top: 24px;
-  font-size: clamp(44px, 9vw, 64px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-
-.hero__tagline {
-  margin-top: 12px;
-  font-size: clamp(18px, 3.4vw, 22px);
-  font-weight: 600;
-}
-
-.hero__divider {
-  width: 56px;
-  height: 3px;
-  margin: 20px 0;
-  border-radius: 2px;
-  background: var(--accent);
-}
-
-.hero__catchphrase {
-  color: var(--brand-text);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.hero__summary {
-  max-width: 520px;
-  margin: 12px 0 32px;
-  color: var(--text-muted);
-  font-size: 15px;
-}
-
-.hero__media {
-  --phone-width: 280px;
-
-  position: relative;
-  justify-self: center;
-}
-
-/*
- * Soft warm glow behind the phone; .hero clips it so it never causes scrolling.
- * z-index: -1 keeps it under the hero copy and the Play badge, never over them.
- */
-.hero__media::before {
-  position: absolute;
-  z-index: -1;
-  inset: -18% -45%;
-  background: radial-gradient(closest-side, var(--hero-glow), var(--hero-glow-fade));
-  content: '';
-  pointer-events: none;
-}
-
-@media (min-width: 760px) {
-  .hero__inner {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 56px;
-    padding-top: 72px;
-    padding-bottom: 72px;
-  }
-
-  .hero__copy {
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .hero__icon {
-    width: 112px;
-    height: 112px;
-    border-radius: 26px;
-  }
-
-  .hero__media {
-    --phone-width: 300px;
-  }
-}
-
-/* App detail: feature cards */
-
-.feature-grid {
-  display: grid;
-  gap: 20px;
-}
-
-.feature-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.feature-card__media {
-  --phone-width: 240px;
-
-  display: flex;
-  justify-content: center;
-  padding: 32px 20px;
-  border-bottom: 1px solid var(--border);
-  border-radius: 23px 23px 0 0;
-  background: var(--stage-bg);
-}
-
-.feature-card__body {
-  padding: 24px 20px 28px;
-}
-
-.feature-card__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.feature-card__icon {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--surface-muted);
-  font-size: 22px;
-}
-
-.feature-card__title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-}
-
-.feature-card__items {
-  margin-top: 14px;
-  color: var(--text-muted);
-  font-size: 15px;
-}
-
-.feature-card__items li,
-.check-list li {
-  position: relative;
-  padding-left: 16px;
-}
-
-.feature-card__items li + li {
-  margin-top: 6px;
-}
-
-.feature-card__items li::before {
-  position: absolute;
-  top: 0.7em;
-  left: 2px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  content: '';
-}
-
-/* A feature without a screenshot reads as a slim strip, not an empty card. */
-.feature-card--compact {
-  background: var(--stage-bg);
-}
-
-.feature-card--compact .feature-card__icon {
-  background: var(--surface);
-}
-
-@media (min-width: 760px) {
-  .feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-flow: row dense;
-  }
-
-  .feature-card__body {
-    padding: 28px;
-  }
-
-  /* The lead feature spans the row with the phone beside its text. */
-  .feature-card--media:first-child {
-    grid-column: 1 / -1;
-    flex-direction: row;
-  }
-
-  .feature-card--media:first-child .feature-card__media {
-    --phone-width: 260px;
-
-    flex-shrink: 0;
-    align-items: center;
-    padding: 40px 48px;
-    border-right: 1px solid var(--border);
-    border-bottom: 0;
-    border-radius: 23px 0 0 23px;
-  }
-
-  .feature-card--media:first-child .feature-card__body {
-    align-self: center;
-    padding: 40px;
-  }
-
-  .feature-card--compact {
-    grid-column: 1 / -1;
-  }
-
-  .feature-card--compact .feature-card__body {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    align-items: center;
-    gap: 32px;
-    padding: 28px 32px;
-  }
-
-  .feature-card--compact .feature-card__items {
-    margin-top: 0;
-  }
-}
-
-/* App detail: recommendations and notes */
-
-.check-list {
-  display: grid;
-  gap: 10px;
-  font-size: 16px;
-}
-
-.check-list li {
-  padding-left: 28px;
-}
-
-.check-list li::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: var(--accent);
-  font-weight: 700;
-  content: '✓';
-}
-
-.notes {
-  display: grid;
-  gap: 8px;
-  padding: 24px;
-  border-radius: 20px;
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  font-size: 15px;
-}
-
-/* Terms and contact links */
-
-.support-links__label {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.support-links__detail {
-  color: var(--text-muted);
+.display {
+  font-family: var(--display);
   font-weight: 400;
+  /* The face has one weight: never fake a bold or an italic from it. */
+  font-synthesis: none;
 }
 
-.support-links--list {
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.support-links--list li + li {
-  border-top: 1px solid var(--border);
-}
-
-.support-links--list .support-links__link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 56px;
-  padding: 12px 20px;
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.support-links--list li:first-child .support-links__link {
-  border-radius: 19px 19px 0 0;
-}
-
-.support-links--list li:last-child .support-links__link {
-  border-radius: 0 0 19px 19px;
-}
-
-.support-links--list .support-links__link:hover {
-  background: var(--surface-muted);
-}
-
-.support-links--list .support-links__link:focus-visible {
-  outline-offset: -2px;
-}
-
-.support-links__hint {
-  flex-shrink: 0;
-  color: var(--brand-text);
-  font-size: 18px;
-  line-height: 1;
-}
-
-/* Spacing alone separates the links, so nothing dangles when the row wraps. */
-.support-links--inline {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 4px;
-  margin-left: -8px;
-}
-
-.support-links--inline .support-links__link {
+.skip-link {
+  position: absolute;
+  left: var(--g);
+  top: -48px;
+  z-index: 200;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 8px;
+  padding: 10px 14px;
   border-radius: 8px;
-  color: inherit;
+  background: var(--fg);
+  color: var(--paper);
+  font: 600 14px/1 var(--sans);
   text-decoration: none;
 }
 
-.support-links--inline .support-links__link:hover {
-  color: var(--text);
-  text-decoration: underline;
+.skip-link:focus {
+  top: 12px;
 }
 
-.support-links--inline .support-links__detail {
-  color: inherit;
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .button {
-    transition: filter 0.15s ease;
+/* In-page links and the skip link land below the sticky header (56px + its border; 64px from 768). */
+html {
+  scroll-padding-top: 57px;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 65px;
+  }
+}
+
+/* Paper grain: a static tile, no blend mode (a blended fixed layer repaints every scroll frame). */
+.page-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-size: 200px 200px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Entrance vocabulary. Fail-safe: the rest state is visible, only fill-mode hides it. */
+.appear {
+  animation-duration: 0.9s;
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-out-expo);
+  animation-delay: var(--d, 0s);
+  animation-play-state: paused;
+}
+
+.fonts-ready .appear {
+  animation-play-state: running;
+}
+
+.appear--soft {
+  animation-name: in-soft;
+}
+
+.appear--rise {
+  animation-name: in-rise;
+}
+
+.appear--down {
+  animation-name: in-down;
+}
+
+.appear--btn {
+  animation-name: in-btn;
+}
+
+.appear--fade {
+  animation-name: in-fade;
+}
+
+.appear--icon {
+  animation-name: in-icon;
+  animation-duration: 1.4s;
+}
+
+.appear.is-in {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes in-soft {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes in-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+
+@keyframes in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* The CTA row holds the Play badge, which is never scaled: fade and rise only. */
+@keyframes in-btn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes in-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The poster icon is centred with a negative margin, so its transform is free for the rise. */
+@keyframes in-icon {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* Masked headline lines */
+.mask-line {
+  display: block;
+  overflow: hidden;
+  padding: 0.06em 0.1em 0.14em;
+  margin: -0.06em -0.1em -0.14em;
+}
+
+.mask-line > span {
+  display: block;
+  animation: ml-up 0.9s var(--ease-out-quint) both;
+  animation-delay: var(--d, 0s);
+  animation-play-state: paused;
+}
+
+.fonts-ready .mask-line > span {
+  animation-play-state: running;
+}
+
+.mask-line > span.is-in {
+  animation: none;
+  transform: none;
+}
+
+@keyframes ml-up {
+  from {
+    transform: translateY(110%);
+  }
+}
+
+@media (min-width: 768px) {
+  .mask-line > span {
+    white-space: nowrap;
+  }
+}
+
+/* Lines that rise when they scroll into view instead of on load */
+.js [data-reveal-lines] .mask-line > span {
+  animation: none;
+  transform: translateY(110%);
+  transition: transform 0.9s var(--ease-out-quint) calc(var(--i, 0) * 120ms);
+}
+
+.js [data-reveal-lines].is-in .mask-line > span {
+  transform: none;
+}
+
+/* Scroll reveals (hidden only when a script runs) */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--y, 30px), 0);
+  transition:
+    opacity var(--dur, 0.7s) var(--ease-reveal) var(--rd, 0s),
+    transform var(--dur, 0.7s) var(--ease-reveal) var(--rd, 0s);
+}
+
+.js [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Phones scroll fast through long lists: a short, shallow reveal with no stagger, so a flick does not leave
+   half the screen as faded cards (!important beats the per-item --rd/--y/--dur set inline). */
+@media (max-width: 767px) {
+  .js [data-reveal] {
+    --dur: 0.45s !important;
+    --y: 12px !important;
+    --rd: 0s !important;
+  }
+}
+
+/* Section edge perforation: paper-coloured bites along a section's top and bottom edges */
+.edge-perf {
+  position: relative;
+}
+
+.edge-perf::before,
+.edge-perf::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  pointer-events: none;
+  background: radial-gradient(circle 4px at 8px 6px, var(--paper) 96%, #0000) 0 0 / 16px 12px repeat-x;
+}
+
+.edge-perf::before {
+  top: -6px;
+}
+
+.edge-perf::after {
+  bottom: -6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 
-  .support-links__link {
-    transition: background-color 0.15s ease, color 0.15s ease;
+  .appear,
+  .mask-line > span {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
-}
 
-/* 404 */
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 
-.not-found {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-  padding-top: 96px;
-  color: var(--text-muted);
-}
+  .js [data-reveal-lines] .mask-line > span {
+    transform: none;
+    transition: none;
+  }
 
-.not-found__title {
-  color: var(--text);
-  font-size: 28px;
-  font-weight: 700;
+  .ticket__piece,
+  .ticket__perf,
+  .act__copy,
+  .act__phone,
+  .act__stub,
+  .btn,
+  .btn::before,
+  .tile * {
+    transition-duration: 0.01s !important;
+  }
 }

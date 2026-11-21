@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      Link-preview card for /yeoun: 1200x630, rendered to public/og/yeoun.png by `yarn og:card`
+      (scripts/og/render.sh). It loads the site's own stylesheets, so the card is the hero ticket the page
+      opens with. Every text is a string from src/data/apps.ts, and there is no date, badge or version
+      (src/lib/pageMeta.test.ts). Content stays 40px clear of the top and bottom for X's 2:1 crop.
+    -->
+    <script>
+      // Read by render.sh (--dump-dom): the PNG is written only when both web fonts loaded, so an offline
+      // run cannot replace the card with one drawn in a fallback face.
+      addEventListener('load', function () {
+        document.fonts.ready.then(function () {
+          var loaded = {};
+          var failed = false;
+          document.fonts.forEach(function (face) {
+            if (face.status === 'loaded') {
+              loaded[face.family.replace(/["']/g, '')] = true;
+            } else if (face.status === 'error') {
+              failed = true;
+            }
+          });
+          var ok = loaded['Gowun Dodum'] && loaded['Pretendard Variable'] && !failed;
+          document.documentElement.setAttribute('data-fonts', ok ? 'ok' : 'missing');
+        });
+      });
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=block" />
+    <link rel="stylesheet" href="../../src/index.css" />
+    <link rel="stylesheet" href="../../src/App.css" />
+    <link rel="stylesheet" href="../../src/styles/ticket.css" />
+    <link rel="stylesheet" href="../../src/styles/stage.css" />
+    <link rel="stylesheet" href="../../src/styles/sections.css" />
+    <style>
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+
+      .og {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1200px;
+        height: 630px;
+      }
+
+      .og .ticket {
+        --pw: 300px;
+        --sw: 150px;
+        --hole: 32px;
+
+        width: 1056px;
+        height: 470px;
+      }
+
+      .og .poster__title {
+        left: 28px;
+        bottom: 28px;
+        font-size: 52px;
+      }
+
+      .og .ticket__body {
+        padding: 56px 40px 56px 60px;
+      }
+
+      .og .hero__eyebrow {
+        gap: 12px;
+        margin-bottom: 28px;
+        font-size: 23px;
+      }
+
+      .og .hero__eyebrow::before {
+        width: 9px;
+        height: 9px;
+      }
+
+      .og .hero__title {
+        font-size: 62px;
+        line-height: 1.3;
+        white-space: nowrap;
+      }
+
+      .og .hub-stub {
+        gap: 18px;
+      }
+
+      .og .hub-stub__label {
+        font-size: 32px;
+      }
+
+      .og .micro {
+        font-size: 17px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="og">
+      <div class="ticket">
+        <div class="ticket__piece ticket__piece--main">
+          <div class="ticket__face">
+            <div class="ticket__poster">
+              <div class="poster">
+                <img class="poster__icon" src="../../public/apps/yeoun-icon.png" alt="" width="512" height="512" />
+                <div class="poster__floor"></div>
+                <p class="poster__title display">여운</p>
+              </div>
+            </div>
+            <div class="ticket__body">
+              <p class="hero__eyebrow">여운 · 공연 기록 다이어리</p>
+              <h1 class="hero__title display">막이 내린 뒤에도,<br />그 순간은 남는다</h1>
+            </div>
+          </div>
+        </div>
+        <div class="ticket__piece ticket__piece--stub">
+          <div class="ticket__face">
+            <span class="ticket__perf"></span>
+            <p class="hub-stub">
+              <span class="hub-stub__label display">공연 기록</span>
+              <span class="micro">Android</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

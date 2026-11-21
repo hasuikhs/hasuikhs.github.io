@@ -1,0 +1,651 @@
+/*
+ * Ticket frame: poster | body | perforation | stub, with punch holes on the seam.
+ * Radius 8px matches the app's ticket card and poster tile.
+ * The holes and a torn edge are cut out of the faces (mask), and one drop shadow on the whole ticket
+ * follows that outline (--ticket-shadow, a filter), so the shadow runs round every cut and under a moved stub.
+ */
+.ticket {
+  --hole: 28px;
+  --hole-r: calc(var(--hole) / 2);
+  --sw: 220px;
+  --pw: 280px;
+
+  position: relative;
+  filter: var(--ticket-shadow);
+  display: flex;
+  width: var(--tw, 100%);
+  min-height: var(--th, auto);
+}
+
+.ticket__piece {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+}
+
+.ticket__piece--main {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ticket__piece--stub {
+  flex: 0 0 var(--sw);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.ticket__face {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ticket);
+  border: 1px solid var(--ticket-edge);
+  border-radius: inherit;
+}
+
+.ticket__piece--main .ticket__face {
+  border-right: 0;
+}
+
+.ticket__piece--stub .ticket__face {
+  border-left: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+}
+
+.ticket__poster {
+  flex: 0 0 var(--pw);
+  min-width: 0;
+  opacity: var(--poster-o, 1);
+}
+
+.ticket__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 40px 40px 40px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/*
+ * Punch holes: cut out of the faces at both ends of the seam (--hole-at-1/-2, set per piece below), so what
+ * lies behind the ticket shows through and the ticket's shadow runs round the cut. Painted discs could not
+ * take the shadow's shade and read as pale or grey coins (2026-11-21 owner). The cut takes the face's 1px
+ * border with it, so a ring in the edge colour (the face background) draws that edge round the cut.
+ * A torn edge (--tear: the scalloped strip, below) is one more mask layer, intersected with the holes.
+ * The composite names one operator per layer (the last is unused) and the prefixed list is left to
+ * autoprefixer: from a lone 'intersect' it wrote 'source-in, xor', which blanked the faces in engines
+ * that read only the prefixed property.
+ */
+.ticket:not(.ticket--solo) .ticket__face {
+  --hole-cut: #0000 calc(var(--hole-r) - 0.5px), #000 calc(var(--hole-r) + 0.5px);
+  --hole-edge: var(--ticket-edge) calc(var(--hole-r) + 0.5px), #0000 calc(var(--hole-r) + 1px);
+
+  -webkit-mask:
+    radial-gradient(circle var(--hole-r) at var(--hole-at-1), var(--hole-cut)),
+    radial-gradient(circle var(--hole-r) at var(--hole-at-2), var(--hole-cut)),
+    var(--tear, linear-gradient(#000, #000));
+  mask:
+    radial-gradient(circle var(--hole-r) at var(--hole-at-1), var(--hole-cut)),
+    radial-gradient(circle var(--hole-r) at var(--hole-at-2), var(--hole-cut)),
+    var(--tear, linear-gradient(#000, #000));
+  mask-composite: intersect, intersect, add;
+  background:
+    radial-gradient(circle calc(var(--hole-r) + 1px) at var(--hole-at-1), var(--hole-edge)) border-box,
+    radial-gradient(circle calc(var(--hole-r) + 1px) at var(--hole-at-2), var(--hole-edge)) border-box,
+    var(--ticket);
+}
+
+/* Horizontal ticket: the holes sit on the top and bottom ends of the seam. */
+.ticket__piece--main .ticket__face {
+  --hole-at-1: 100% 0;
+  --hole-at-2: 100% 100%;
+}
+
+/*
+ * While whole, the main piece runs 1px under the stub: at a fractional device scale (2.625, 125%) the two
+ * masked faces otherwise leave a hairline at the seam where the shadow behind shows through. Its holes
+ * move back by the same 1px so they meet the stub's halves.
+ */
+.ticket:not(.ticket--v):not(.is-dropped):not(.is-torn) .ticket__piece--main {
+  margin-right: -1px;
+}
+
+.ticket:not(.ticket--v):not(.is-dropped):not(.is-torn) .ticket__piece--main .ticket__face {
+  --hole-at-1: calc(100% - 1px) 0;
+  --hole-at-2: calc(100% - 1px) 100%;
+}
+
+.ticket__piece--stub .ticket__face {
+  --hole-at-1: 0 0;
+  --hole-at-2: 0 100%;
+}
+
+/* Perforation: 2px dashes, 6 on 6 off, on the stub's left edge between the holes. */
+.ticket__perf {
+  position: absolute;
+  left: 0;
+  top: calc(var(--hole) / 2 + 6px);
+  bottom: calc(var(--hole) / 2 + 6px);
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--perf) 0 6px, #0000 6px 12px);
+  opacity: var(--perf-o, 1);
+  transform-origin: top;
+}
+
+/* Drawn once on load; .is-in (useEntrance) drops the animation so later transitions apply. */
+.ticket--draw .ticket__perf {
+  animation: perf-draw-y 0.8s var(--ease-out-expo) 0.4s both paused;
+}
+
+.ticket--draw.ticket--v .ticket__perf {
+  animation-name: perf-draw-x;
+}
+
+.fonts-ready .ticket--draw .ticket__perf {
+  animation-play-state: running;
+}
+
+.ticket--draw .ticket__perf.is-in {
+  animation: none;
+}
+
+@keyframes perf-draw-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes perf-draw-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Torn: the perforation becomes a scalloped edge (3px half-circles every 12px), cut with the holes. */
+.is-torn .ticket__piece--main .ticket__face {
+  --tear: radial-gradient(circle 3px at 100% 6px, #0000 97%, #000) 0 0 / 100% 12px repeat-y;
+}
+
+.is-torn .ticket__piece--stub .ticket__face {
+  --tear: radial-gradient(circle 3px at 0 6px, #0000 97%, #000) 0 0 / 100% 12px repeat-y;
+}
+
+/* Vertical ticket (<768): stub at the bottom, perforation across, holes on the left and right ends. */
+.ticket--v {
+  --hole: 20px;
+
+  flex-direction: column;
+}
+
+.ticket--v .ticket__piece--main {
+  border-radius: 8px 8px 0 0;
+}
+
+.ticket--v .ticket__piece--stub {
+  flex: 0 0 auto;
+  border-radius: 0 0 8px 8px;
+}
+
+.ticket--v .ticket__piece--main .ticket__face {
+  border-right: 1px solid var(--ticket-edge);
+  border-bottom: 0;
+  flex-direction: column;
+}
+
+.ticket--v .ticket__piece--stub .ticket__face {
+  border-left: 1px solid var(--ticket-edge);
+  border-top: 0;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+/* Vertical ticket: holes on the left and right ends of the seam; the main piece is the top one. */
+.ticket--v .ticket__piece--main .ticket__face {
+  --hole-at-1: 0 100%;
+  --hole-at-2: 100% 100%;
+}
+
+.ticket--v:not(.is-dropped):not(.is-torn) .ticket__piece--main {
+  margin-bottom: -1px;
+}
+
+.ticket--v:not(.is-dropped):not(.is-torn) .ticket__piece--main .ticket__face {
+  --hole-at-1: 0 calc(100% - 1px);
+  --hole-at-2: 100% calc(100% - 1px);
+}
+
+.ticket--v .ticket__piece--stub .ticket__face {
+  --hole-at-1: 0 0;
+  --hole-at-2: 100% 0;
+}
+
+.ticket--v .ticket__perf {
+  top: 0;
+  bottom: auto;
+  left: calc(var(--hole) / 2 + 6px);
+  right: calc(var(--hole) / 2 + 6px);
+  width: auto;
+  height: 2px;
+  background: repeating-linear-gradient(to right, var(--perf) 0 6px, #0000 6px 12px);
+  transform-origin: left;
+}
+
+.ticket--v .ticket__poster {
+  flex: 0 0 auto;
+}
+
+.ticket--v.is-torn .ticket__piece--main .ticket__face {
+  --tear: radial-gradient(circle 3px at 6px 100%, #0000 97%, #000) 0 0 / 12px 100% repeat-x;
+}
+
+.ticket--v.is-torn .ticket__piece--stub .ticket__face {
+  --tear: radial-gradient(circle 3px at 6px 0, #0000 97%, #000) 0 0 / 12px 100% repeat-x;
+}
+
+/* A ticket without a stub (small archive card) is a whole card: all corners, no holes. */
+.ticket--solo .ticket__piece--main {
+  border-radius: 8px;
+}
+
+.ticket--solo .ticket__piece--main .ticket__face {
+  border-right: 1px solid var(--ticket-edge);
+}
+
+/* Stub type */
+.stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  text-align: center;
+}
+
+.stub__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 4px;
+  background: var(--spot);
+  color: var(--on-spot);
+  font: 700 12px/1 var(--sans);
+}
+
+.stub__star {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--fg);
+  font: 700 14px/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.stub__star svg {
+  color: var(--spot);
+}
+
+.stub__num {
+  color: var(--fg);
+  font: 700 clamp(30px, 2.8vw, 40px)/1 var(--sans);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stub__sub {
+  color: var(--fg-60);
+  font: 500 14px/1.3 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Stub scenes (AppActScene; the act stubs play them, stage.css). With no state the parts draw the scene's
+ * end, which is what reduced motion and a page without script show. [data-scene='armed'] on an ancestor
+ * holds the start; [data-scene='playing'] runs to the end.
+ */
+
+/* Countdown: the badges share one grid cell; [data-day] picks the one that shows (the first by default). */
+.stub__count {
+  display: inline-grid;
+}
+
+.stub__count > .stub__badge {
+  grid-area: 1 / 1;
+  justify-self: center;
+  transition:
+    opacity 0.2s ease,
+    transform 0.32s var(--ease-out-quint);
+}
+
+.stub__count > .stub__badge:not(:first-child),
+[data-day] .stub__count > .stub__badge {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+[data-day='0'] .stub__count > [data-d='0'],
+[data-day='1'] .stub__count > [data-d='1'],
+[data-day='2'] .stub__count > [data-d='2'],
+[data-day='3'] .stub__count > [data-d='3'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Rating: the badge flips over to the star line, whose number rolls up through the half stars. */
+.stub__flip {
+  display: inline-grid;
+}
+
+.stub__flip > * {
+  grid-area: 1 / 1;
+  justify-self: center;
+  align-self: center;
+}
+
+.stub__flip-front {
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+[data-scene='armed'] .stub__flip-front {
+  opacity: 1;
+  transform: none;
+}
+
+[data-scene='armed'] .stub__flip-back {
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+[data-scene='playing'] .stub__flip-front {
+  opacity: 0;
+  transform: scaleY(0);
+  transition:
+    transform 0.14s ease-in 0.5s,
+    opacity 0s linear 0.64s;
+}
+
+[data-scene='playing'] .stub__flip-back {
+  opacity: 1;
+  transform: none;
+  transition:
+    transform 0.2s var(--ease-out-quint) 0.64s,
+    opacity 0s linear 0.64s;
+}
+
+.stub__roll {
+  display: inline-block;
+  height: 1.15em;
+  overflow: hidden;
+}
+
+.stub__roll-strip {
+  display: block;
+  transform: translateY(calc(var(--roll-n, 0) * -1.15em));
+}
+
+.stub__roll-strip > span {
+  display: block;
+  height: 1.15em;
+  line-height: 1.15;
+}
+
+[data-scene='armed'] .stub__roll-strip {
+  transform: none;
+}
+
+[data-scene='playing'] .stub__roll-strip {
+  transition: transform 0.72s steps(var(--roll-n, 1), end) 0.82s;
+}
+
+/* CSS poster: the poster of a performance called 여운. */
+.poster {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--poster-bg);
+}
+
+.poster__meta {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  font: 600 11px/1 var(--sans);
+  letter-spacing: 0.08em;
+  color: var(--poster-ink-2);
+}
+
+/* App icon, centred by a negative margin so the entrance transform does not fight the centring.
+ * Corner radius 22% matches the hub card icon (22px on 96px). */
+.poster__icon {
+  position: absolute;
+  left: 50%;
+  top: 21%;
+  display: block;
+  width: 46%;
+  height: auto;
+  margin-left: -23%;
+  aspect-ratio: 1;
+  border-radius: 22%;
+  box-shadow: var(--poster-icon-shadow);
+}
+
+.poster__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 60%;
+  height: 1px;
+  background: var(--poster-line);
+  box-shadow: 0 10px 0 var(--poster-line), 0 20px 0 var(--poster-line);
+}
+
+.poster__title {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 22px;
+  margin: 0;
+  font: 400 clamp(36px, 3.4vw, 48px)/1.1 var(--display);
+  letter-spacing: -0.01em;
+  color: var(--poster-ink);
+}
+
+/* Compact poster: a 96px band across the top of a vertical ticket. */
+.poster--compact {
+  height: 96px;
+}
+
+.poster--compact .poster__meta span + span,
+.poster--compact .poster__floor {
+  display: none;
+}
+
+.poster--compact .poster__icon {
+  left: auto;
+  right: 18px;
+  top: 16px;
+  width: 64px;
+  margin-left: 0;
+}
+
+.poster--compact .poster__title {
+  bottom: 14px;
+  font-size: 32px;
+}
+
+/* Phone frame around a 9:20 capture */
+.phone {
+  position: relative;
+  width: var(--phone-width, 260px);
+  max-width: 100%;
+  padding: 8px;
+  border-radius: 38px;
+  background: var(--bezel);
+  box-shadow: var(--piece-shadow);
+}
+
+.phone__screen {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 9 / 20;
+  border-radius: 30px;
+  background: var(--paper-deep);
+}
+
+.phone__screen img,
+.shot-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A capture that failed to load leaves its frame and the paper-deep fill, not a broken icon. */
+img[data-missing] {
+  visibility: hidden;
+}
+
+/* Poster of a phone capture: the screen rises from the bottom edge of a poster-coloured panel,
+ * shown from its own top (status bar): the rounded top corners are the device's, and the only cut is the
+ * panel's bottom edge, at every column width.
+ * Each context sets the panel size and --rise-pad / --rise-radius (sections.css). */
+.shot-poster-wrap {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  padding: var(--rise-pad, 28px 30px 0);
+  border-radius: 8px;
+  background: var(--poster-bg);
+}
+
+.shot-poster {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--rise-radius, 16px) var(--rise-radius, 16px) 0 0;
+  background: var(--paper-deep);
+  box-shadow: var(--poster-screen-shadow);
+}
+
+.shot-poster img {
+  object-position: 50% 0;
+  transform-origin: 50% 0;
+}
+
+/* A capture whose feature sits at the bottom of the screen (screenshot.anchor 'bottom') shows its lower end. */
+.shot-poster-wrap--bottom .shot-poster img {
+  object-position: 50% 100%;
+  transform-origin: 50% 100%;
+}
+
+/* Button: a paper wipe in the app's 12px radius */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--brand);
+  border-radius: 12px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font: 600 15px/1 var(--sans);
+  text-decoration: none;
+  transition:
+    transform 0.3s var(--ease-out-expo),
+    box-shadow 0.3s var(--ease-out-expo),
+    color 0.7s var(--ease-out-expo);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--fg);
+  transform: translateX(-101%);
+  transition: transform 0.7s var(--ease-out-expo);
+}
+
+@media (hover: hover) {
+  .btn:hover {
+    color: var(--paper);
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 rgba(28, 21, 16, 0.35);
+  }
+
+  .btn:hover::before {
+    transform: translateX(0);
+  }
+}
+
+@media (hover: hover) {
+  :root[data-theme='dark'] .btn:hover {
+    box-shadow: 3px 3px 0 #404040; /* ink-700, no orange glow on dark */
+  }
+}
+
+.btn:active {
+  transform: none;
+  box-shadow: none;
+  color: var(--paper);
+}
+
+/* Pressed: the hover's ink wipe, quickly, so a tap on a phone shows too. */
+.btn:active::before {
+  transform: translateX(0);
+  transition-duration: 0.15s;
+}
+
+.btn:focus-visible {
+  border-radius: 12px;
+}
+
+/* Official Google Play badge: never transformed, filtered, bordered or shadowed. */
+.play-badge {
+  display: inline-block;
+  flex: 0 0 auto;
+  border-radius: 8px;
+}
+
+.play-badge:focus-visible {
+  outline-offset: 4px;
+}
+
+.play-badge__image {
+  display: block;
+  width: auto;
+  max-width: none;
+}
+
+.play-badge__image--40 {
+  height: 40px;
+}
+
+.play-badge__image--44 {
+  height: 44px;
+}
+
+.play-badge__image--48 {
+  height: 48px;
+}
