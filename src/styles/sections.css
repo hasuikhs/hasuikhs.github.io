@@ -711,6 +711,16 @@
   font-size: 12px;
 }
 
+/* Phones, on a page with the back-to-top button (it follows the footer): at the bottom of the page the button
+   sits over the right end of this line, so the line keeps clear of it (44px wide, 16px in, 12px apart) and
+   wraps into two even lines instead of running under it. */
+@media (max-width: 767px) {
+  .site-footer:has(+ .back-to-top) .site-footer__legal {
+    padding-right: 56px;
+    text-wrap: balance;
+  }
+}
+
 /* ---------- Hub ---------- */
 .hub {
   max-width: 960px;

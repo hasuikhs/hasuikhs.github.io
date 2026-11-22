@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { CONTACT_EMAIL, SITE } from '../data/apps';
 import type { AppInfo } from '../data/apps';
 
-// Terms and contact as one compact row (the footer).
+// Terms, account deletion and contact as one compact row (the footer).
 type SupportLinksProps = {
   app: AppInfo;
 };
@@ -21,6 +21,7 @@ function SupportLinks({ app }: SupportLinksProps) {
   const links: SupportLink[] = [
     { label: SITE.privacyPolicy, href: app.privacyPolicyUrl },
     { label: SITE.terms, href: app.termsUrl },
+    { label: SITE.accountDeletion, href: app.accountDeletionUrl },
     { label: SITE.contact, detail: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
   ];
 

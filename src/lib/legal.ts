@@ -1,6 +1,8 @@
 // The legal documents' versions and routes, read from src/content/legal: legal.json lists the versions (newest,
 // the one in force, first), documents.json is their text rendered at build time by scripts/legal-docs.js.
 // The helpers mirror that script's, so the page and the served HTML (copy-routes.js) agree.
+// account-deletion.json is the account deletion guide (account-deletion.md), rendered by the same script.
+import ACCOUNT_DELETION_CONTENT from '../content/legal/account-deletion.json';
 import DOCUMENTS from '../content/legal/documents.json';
 import LEGAL from '../content/legal/legal.json';
 
@@ -61,3 +63,7 @@ export function legalDoc(key: LegalDocKey): LegalDoc {
 export const LEGAL_DOC_KEYS = Object.keys(LEGAL.documents) as LegalDocKey[];
 
 export const legalContent = (key: LegalDocKey, date: string): LegalContent | undefined => CONTENT[key][date];
+
+// The account deletion guide: its name and path (legal.json), and its text.
+export const ACCOUNT_DELETION = LEGAL.accountDeletion;
+export const accountDeletionContent: LegalContent = ACCOUNT_DELETION_CONTENT;

@@ -79,6 +79,19 @@
     "twitterCard": "summary",
     "noindex": true
   },
+  "yeounAccountDeletion": {
+    "path": "/yeoun/account-deletion/",
+    "file": "yeoun/account-deletion/index.html",
+    "title": "여운 계정 삭제",
+    "description": "여운 계정과 서버에 저장된 기록을 지우는 방법이에요. 앱에서 탈퇴하거나, 앱 없이 메일로 삭제를 요청할 수 있어요.",
+    "image": {
+      "path": "/logo512.png",
+      "width": 512,
+      "height": 512,
+      "alt": "여운 앱 아이콘"
+    },
+    "twitterCard": "summary"
+  },
   "notFound": {
     "file": "404.html",
     "title": "페이지를 찾을 수 없어요",

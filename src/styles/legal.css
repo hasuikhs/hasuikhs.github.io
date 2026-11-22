@@ -142,8 +142,8 @@
   margin-top: 14px;
 }
 
-/* The date line the document opens with. */
-.legal-doc__body > p:first-child {
+/* The date line the document opens with (legal documents only — the account deletion guide opens with prose). */
+.legal-doc:not(.legal-doc--guide) .legal-doc__body > p:first-child {
   color: var(--fg-60);
   font-size: 15px;
 }

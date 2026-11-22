@@ -227,7 +227,15 @@ test('the footer opens the documents in place, on every page, and nothing links 
     expect(terms).toHaveAttribute('href', '/yeoun/terms/');
     expect(terms).not.toHaveAttribute('target');
     expect(within(footer).getByRole('link', { name: '개인정보처리방침' })).toHaveAttribute('href', '/yeoun/privacy/');
+    expect(within(footer).getByRole('link', { name: '계정 삭제' })).toHaveAttribute('href', '/yeoun/account-deletion/');
     expect(within(footer).getByRole('link', { name: /문의하기/ })).toHaveAttribute('href', 'mailto:hasuidev@gmail.com');
+    // In this order: the two documents, then deleting the account, then the contact.
+    expect(within(footer).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/yeoun/privacy/',
+      '/yeoun/terms/',
+      '/yeoun/account-deletion/',
+      'mailto:hasuidev@gmail.com',
+    ]);
     expect(document.body.innerHTML).not.toMatch(/notion/i);
     unmount();
   });
@@ -276,7 +284,7 @@ test.each(legalDoc('privacy').versions.map((version) => version.date))(
 );
 
 test("the developer's name is on no other page, title or description", () => {
-  [ '/', '/yeoun', '/nope' ].forEach((path) => {
+  [ '/', '/yeoun', '/yeoun/account-deletion/', '/nope' ].forEach((path) => {
     const { unmount } = renderAt(path);
     expect({ path, page: countIn(document.body.textContent) }).toEqual({ path, page: 0 });
     unmount();

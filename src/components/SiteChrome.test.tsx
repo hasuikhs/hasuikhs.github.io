@@ -77,6 +77,27 @@ describe('back to top', () => {
     expect(sectionsCss).toMatch(/\.back-to-top \{[^}]*visibility:\s*hidden;/);
     expect(sectionsCss).toMatch(/\.back-to-top\[data-visible\] \{[^}]*visibility:\s*visible;/);
   });
+
+  // At the bottom of a phone page the button used to cover the end of the footer's trademark line. The rule
+  // goes by the button following the footer, on every page that has one.
+  test.each([ '/yeoun', '/yeoun/privacy', '/yeoun/terms', '/yeoun/account-deletion' ])(
+    'on %s the button follows the footer',
+    (route) => {
+      const { container } = render(
+        <MemoryRouter initialEntries={ [ route ] }>
+          <App />
+        </MemoryRouter>,
+      );
+      const footer = container.querySelector('.site-footer');
+      expect(footer?.nextElementSibling).toBe(screen.getByRole('button', { name: SITE.backToTop }));
+    },
+  );
+
+  test('on phones the footer\'s last line keeps clear of the button', () => {
+    expect(sectionsCss).toMatch(
+      /@media \(max-width: 767px\) \{\s*\.site-footer:has\(\+ \.back-to-top\) \.site-footer__legal \{[^}]*padding-right:\s*56px;/,
+    );
+  });
 });
 
 describe('theme switch', () => {

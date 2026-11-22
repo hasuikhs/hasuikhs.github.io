@@ -13,7 +13,7 @@ import PAGE_META from '../data/pageMeta.json';
 import { metaTags, renderPage as pageHtml } from '../../scripts/page-meta';
 import { writeRoutes } from '../../scripts/copy-routes';
 import { legalRoutes, staticMarkup } from '../../scripts/legal-docs';
-import { formatDate, legalContent, legalDoc } from './legal';
+import { accountDeletionContent, formatDate, legalContent, legalDoc } from './legal';
 import type { LegalDocKey } from './legal';
 
 const ROOT = path.join(__dirname, '..', '..');
@@ -85,6 +85,7 @@ describe('page meta', () => {
     [ '/yeoun/terms/2026-11-10/', PAGES['yeounTerms-2026-11-10'].title ],
     [ '/yeoun/privacy/', PAGES.yeounPrivacy.title ],
     [ '/yeoun/privacy/2026-11-10/', PAGES['yeounPrivacy-2026-11-10'].title ],
+    [ '/yeoun/account-deletion/', PAGES.yeounAccountDeletion.title ],
   ])('%s sets the same document title as its served HTML', (route, title) => {
     render(
       <MemoryRouter initialEntries={ [ route ] }>
@@ -335,5 +336,48 @@ describe('legal documents', () => {
     ([ 'terms', 'privacy' ] as LegalDocKey[]).forEach((key) => {
       legalDoc(key).versions.forEach((version) => expect(pageAt(version.path)).toBeDefined());
     });
+  });
+});
+
+// The page Google Play's account deletion policy links to: found by search and readable without JavaScript.
+describe('account deletion page', () => {
+  const PATH = '/yeoun/account-deletion/';
+  const page = PAGES.yeounAccountDeletion;
+
+  test('is written where GitHub Pages serves it, indexed, with a plain title and description', () => {
+    expect(page).toMatchObject({ path: PATH, file: 'yeoun/account-deletion/index.html', title: '여운 계정 삭제' });
+    expect(page.noindex).toBeUndefined();
+    expect(page.description).toBe('여운 계정과 서버에 저장된 기록을 지우는 방법이에요. 앱에서 탈퇴하거나, 앱 없이 메일로 삭제를 요청할 수 있어요.');
+    expect(page.image).toEqual(PAGES.yeounPrivacy.image);
+    expect(page.twitterCard).toBe('summary');
+  });
+
+  test('is served with its title, canonical URL and the whole guide, and no line saying it needs JavaScript', () => {
+    const html = pageHtml(SHELL, page, undefined, staticMarkup(PATH));
+    const url = `${ORIGIN}${PATH}`;
+    expect(titlesOf(html)).toEqual([ page.title ]);
+    expect(metaValues(html, 'description')).toEqual([ page.description ]);
+    expect(tagsOf(html, 'link').filter((attrs) => attrs.rel === 'canonical').map((attrs) => attrs.href)).toEqual([ url ]);
+    expect(metaValues(html, 'og:url')).toEqual([ url ]);
+    expect(metaValues(html, 'og:title')).toEqual([ page.title ]);
+    expect(metaValues(html, 'robots')).toEqual([]);
+    expect(html).toContain('<div id="root"><!--prerendered--><div class="app">');
+    expect(html).toContain(`<h1 class="legal-doc__title">${accountDeletionContent.title}</h1>`);
+    expect(html).toContain(accountDeletionContent.blocks.join(''));
+    expect(html).not.toContain('<noscript>');
+  });
+
+  test('postbuild writes the guide into its route', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'page-meta-'));
+    try {
+      writeFileSync(path.join(dir, 'index.html'), SHELL);
+      writeRoutes(dir);
+      const html = readFileSync(path.join(dir, 'yeoun', 'account-deletion', 'index.html'), 'utf8');
+      expect(titlesOf(html)).toEqual([ page.title ]);
+      expect(html).toContain(accountDeletionContent.blocks.join(''));
+      expect(html).toContain('<a href="mailto:hasuidev@gmail.com">hasuidev@gmail.com</a>');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

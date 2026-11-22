@@ -139,90 +139,6 @@
   }
 }
 
-/*
- * Phones: the scroll cue (components/ScrollCue) at the end of the acts' eyebrow row, the row the first screen
- * ends on, right under the hero ticket. Its 32px target reaches into the row's margins (negative margins), so
- * the row stays the eyebrow's height and the text lines up with the ticket's right edge.
- */
-.acts__lead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  column-gap: 16px;
-}
-
-.scroll-cue {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  margin: -8px -8px -8px auto;
-  padding: 0 8px;
-  color: var(--fg-60);
-  font: 500 13px/1.2 var(--sans);
-  text-decoration: none;
-  transition: color 0.3s var(--ease-state);
-}
-
-.scroll-cue__inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-/* Gone for good once the reader scrolls: faded, then hidden (out of the tab order). */
-.scroll-cue[data-hidden] {
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.4s var(--ease-state),
-    visibility 0s linear 0.4s;
-}
-
-.scroll-cue:active {
-  color: var(--brand-text);
-}
-
-@media (hover: hover) {
-  .scroll-cue:hover {
-    color: var(--brand-text);
-  }
-}
-
-/* One gentle nudge after the cue has come in (its fade starts at 1s), held like the entrances until the fonts
-   are ready. The chevron's stroke sits in the middle of its 16px box, so the 3px nudge stays inside it. */
-.scroll-cue__chevron {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  animation: cue-nudge 1.2s var(--ease-state) 1.8s 1 both;
-  animation-play-state: paused;
-}
-
-.fonts-ready .scroll-cue__chevron {
-  animation-play-state: running;
-}
-
-@keyframes cue-nudge {
-  30% {
-    transform: translateY(3px);
-  }
-
-  60% {
-    transform: none;
-  }
-
-  80% {
-    transform: translateY(1.5px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll-cue__chevron {
-    animation: none;
-  }
-}
-
 /* Hero stub: badge, number, sub, stacked like the app stub */
 .ticket--v .hero-stub .stub {
   flex-direction: row;
@@ -233,7 +149,8 @@
   font-size: 24px;
 }
 
-/* Hint under the stage ticket: a dashed tear line and a chevron that nudges down (48px tall). */
+/* Scroll hint (components/ScrollHint): a dashed tear line and a chevron that nudges down, 48px tall. The stage
+   places it under the stage ticket; the stacked page draws it in the flow under the hero ticket (below). */
 .tear__hint {
   position: absolute;
   left: 50%;
@@ -548,9 +465,45 @@
   width: 40px;
 }
 
-.tear[data-mode='stacked'] .act__bars,
-.tear[data-mode='stacked'] .tear__hint {
+.tear[data-mode='stacked'] .act__bars {
   display: none;
+}
+
+/*
+ * Stacked (phones, tablets, short windows, reduced motion): the same hint in the flow, centred between the hero
+ * ticket and the acts, so the first screen says the page goes on below. It leaves at the reader's first scroll
+ * and stays gone (ScrollHint), keeping its room so nothing below moves: on phones the torn stub then hangs
+ * where it was. Out of the stage it has no z-index, and the ticket (a filter, so a layer of its own) would
+ * paint its shadow over the tear line, which the dark theme's shadow all but hides: isolation gives the hint
+ * a layer after the ticket's, as in the stage.
+ */
+.tear[data-mode='stacked'] .tear__hint {
+  position: static;
+  isolation: isolate;
+  width: max-content;
+  margin: 0 auto;
+  transform: none;
+}
+
+.tear[data-mode='stacked'] .tear__hint[data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.4s var(--ease-state),
+    visibility 0s linear 0.4s;
+}
+
+/* Phones: a shorter tear line (14px) keeps it 40px tall with the 2px above it: on a 360x640 screen '주요 기능'
+   still ends the first screen under it. A window shorter than about 570px never shows it (the ticket ends
+   there): it leaves at the first scroll, and only its room stays. */
+@media (max-width: 767px) {
+  .tear[data-mode='stacked'] .tear__hint {
+    padding-top: 2px;
+  }
+
+  .tear[data-mode='stacked'] .tear__hint-inner::before {
+    height: 14px;
+  }
 }
 
 /* ---------- Act copy (both modes) ---------- */
@@ -621,10 +574,10 @@
 }
 
 /* ---------- Stacked mode ---------- */
-/* Phones (768 and up set their own padding below): the acts follow the hero ticket closely (4px here plus the
-   acts' 24px), so the first screen ends on '주요 기능', the scroll cue and the top of '공연 하나, 세 장면' rather
-   than on blank paper, down to a 360x640 screen. 28px still clears the stub's corner once it has torn off and
-   dropped 18px. */
+/* Phones (768 and up set their own padding below): the scroll hint (40px) follows the hero ticket closely (4px
+   here), then the acts (10px), so the first screen ends on the hint and '주요 기능' rather than on blank paper,
+   down to a 360x640 screen; a taller screen shows the top of '공연 하나, 세 장면' too. The 54px between the
+   ticket and the acts clears the stub's corner once it has torn off and dropped 18px. */
 .tear[data-mode='stacked'] .tear__ticket {
   max-width: calc(1120px + 2 * var(--g));
   margin: 0 auto;
@@ -633,6 +586,12 @@
 
 .tear[data-mode='stacked'] .acts__inner {
   padding-top: 24px;
+}
+
+@media (max-width: 767px) {
+  .tear[data-mode='stacked'] .acts__inner {
+    padding-top: 10px;
+  }
 }
 
 .tear[data-mode='stacked'] .act {
@@ -684,8 +643,9 @@
 }
 
 @media (min-width: 768px) {
+  /* 16px under the ticket, then the scroll hint (48px): the acts start 64px under the ticket. */
   .tear[data-mode='stacked'] .tear__ticket {
-    padding: 32px var(--g) 64px;
+    padding: 32px var(--g) 16px;
   }
 
   .tear[data-mode='stacked'] .act {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { onMediaChange } from '../lib/mediaQuery';
 import { countdownDay } from '../lib/stubScenes';
+import { SCROLLED_AFTER } from './useHasScrolled';
 
 // The scroll stage needs room and motion; everything else gets the stacked page. At 600px tall the stage
 // ticket is 419px (--th in stage.css) and still holds the hero copy (about 340px with its padding); a
@@ -302,7 +303,9 @@ function useTearStage() {
 
   // Stacked: tear the stub off once, when the scroll comes to rest with the stub risen into view
   // (stubSettledInView). It arms only after the reader's first scroll: on a tablet the whole ticket fits the
-  // first screen, and a tear that plays by itself a second after load is easy to miss.
+  // first screen, and a tear that plays by itself a second after load is easy to miss. The first scroll is the
+  // one the scroll hint leaves at (SCROLLED_AFTER): a scroll event that leaves the page at the top (App's
+  // ScrollToTop after a link) is not one, or the stub tore by itself there, on a tall phone over the hint.
   useEffect(() => {
     const ticket = ticketRef.current;
     const stub = stubRef.current;
@@ -363,6 +366,9 @@ function useTearStage() {
     };
 
     const onScroll = () => {
+      if (window.scrollY <= SCROLLED_AFTER) {
+        return;
+      }
       scrolled = true;
       window.removeEventListener('scroll', onScroll);
       arm();

@@ -13,6 +13,11 @@
     "toCurrent": "현행 {name} 보기",
     "toOther": "{name} 보기"
   },
+  "accountDeletion": {
+    "name": "계정 삭제",
+    "path": "/yeoun/account-deletion/",
+    "source": "account-deletion.md"
+  },
   "documents": {
     "terms": {
       "name": "이용약관",

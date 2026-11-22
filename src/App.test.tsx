@@ -86,7 +86,7 @@ test('Yeoun page menu and hero button say plainly where they go', () => {
   expect(screen.getByRole('link', { name: '주요 기능 보기' })).toHaveAttribute('href', '#acts');
 });
 
-test('the scroll hint under the stage ticket is a decorative icon with no words', () => {
+test('the scroll hint under the hero ticket is a decorative icon with no words', () => {
   renderAt('/yeoun');
   const hint = screen.getByTestId('tear-hint');
   expect(hint).toHaveAttribute('aria-hidden', 'true');

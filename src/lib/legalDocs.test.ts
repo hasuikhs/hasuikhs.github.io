@@ -4,20 +4,23 @@ import path from 'path';
 
 import LEGAL from '../content/legal/legal.json';
 import {
+  ACCOUNT_DELETION_OUTPUT,
   CONTENT_DIR,
   OUTPUT,
+  buildAccountDeletion,
   buildDocuments,
   fill as scriptFill,
   formatDate as scriptFormatDate,
   joinDots as scriptJoinDots,
   legalRoutes,
   renderDocument,
+  renderGuide,
   serialize,
   staticMarkup,
   versionLabel,
   versionPath,
 } from '../../scripts/legal-docs';
-import { LEGAL_DOC_KEYS, fill, formatDate, legalContent, legalDoc } from './legal';
+import { ACCOUNT_DELETION, LEGAL_DOC_KEYS, accountDeletionContent, fill, formatDate, legalContent, legalDoc } from './legal';
 import type { LegalDocKey } from './legal';
 import { joinDots } from './text';
 
@@ -161,5 +164,48 @@ describe('served markup', () => {
 
   test('is empty for any other page', () => {
     [ '/', '/yeoun/', '/yeoun/terms/2026-11-20/', '/yeoun/terms', '/nope/' ].forEach((route) => expect(staticMarkup(route)).toBe(''));
+  });
+});
+
+// The account deletion guide (account-deletion.md): the site's own page, not a dated document from the app repo.
+describe('account deletion guide', () => {
+  test('account-deletion.json is the rendering of account-deletion.md (run `yarn legal` after changing it)', () => {
+    expect(readFileSync(ACCOUNT_DELETION_OUTPUT, 'utf8')).toBe(serialize(buildAccountDeletion()));
+    expect(LEGAL.accountDeletion).toEqual({ name: '계정 삭제', path: '/yeoun/account-deletion/', source: 'account-deletion.md' });
+    expect(ACCOUNT_DELETION).toEqual(LEGAL.accountDeletion);
+    expect(accountDeletionContent.title).toBe('여운 계정 삭제');
+    // Not a version of a document: legal.json lists it outside `documents`, and no route takes it for one.
+    expect(LEGAL_DOC_KEYS).not.toContain('accountDeletion');
+    expect(legalRoutes().map((route) => route.path)).not.toContain(ACCOUNT_DELETION.path);
+  });
+
+  test('starts with its one # title, has no date line to check, and stops on markdown the renderer does not draw', () => {
+    expect(renderGuide('# 제목\n\n본문 hasuidev@gmail.com\n')).toEqual({
+      title: '제목',
+      blocks: [ '<p>본문 <a href="mailto:hasuidev@gmail.com">hasuidev@gmail.com</a></p>' ],
+    });
+    expect(() => renderGuide('본문만\n')).toThrow(/starts with its # title/);
+    expect(() => renderGuide('# 하나\n\n# 둘\n')).toThrow(/one # title/);
+    expect(() => renderGuide('# 제목\n\n> 인용\n')).toThrow(/unsupported blockquote/);
+  });
+
+  test('keeps a middle dot on the line of the word before it', () => {
+    const html = accountDeletionContent.blocks.join('');
+    expect(html).toContain('이메일 주소\u2060·이름');
+    expect(html).not.toMatch(/[^\s\u2060]·/);
+  });
+
+  test('is served with the header, the title, a link to the privacy policy and the whole guide', () => {
+    const root = served(ACCOUNT_DELETION.path);
+    expect(root.querySelector('.site-header__back')?.getAttribute('href')).toBe('/yeoun/');
+    expect(root.querySelector('.site-header__back')?.textContent).toBe('여운 소개');
+    expect(root.querySelector('main#main.legal')).not.toBeNull();
+    expect(root.querySelector('h1')?.textContent).toBe('여운 계정 삭제');
+    expect(root.querySelector('.legal-doc__body')?.innerHTML).toBe(accountDeletionContent.blocks.join(''));
+    expect(root.querySelector('.legal-doc__other')?.textContent).toBe('개인정보처리방침 보기');
+    expect(root.querySelector('.legal-doc__other')?.getAttribute('href')).toBe('/yeoun/privacy/');
+    expect(root.querySelector('.legal-doc__versions')).toBeNull();
+    expect(root.querySelector('.legal__notice')).toBeNull();
+    expect(staticMarkup('/yeoun/account-deletion')).toBe('');
   });
 });

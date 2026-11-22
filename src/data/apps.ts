@@ -100,14 +100,15 @@ export type AppInfo = {
   // A path on this site ('/yeoun/privacy/') opens in place; anything else is an outside link.
   privacyPolicyUrl: string;
   termsUrl: string;
+  // Deleting the account and its data, in the app or without it (the page Google Play's policy links to).
+  accountDeletionUrl: string;
   // Menu across the top of the app page, in page order.
   nav: AppAnchor[];
   eyebrow: string;
   heroLede: string;
-  // Secondary hero button (scrolls to the acts). The hint under the stage ticket is an icon.
+  // Secondary hero button (scrolls to the acts; tablets and up). The scroll hint under the ticket is an icon
+  // with no words (components/ScrollHint), at every width.
   heroMore: string;
-  // Phones: the same link as a quiet scroll cue under the hero ticket (components/ScrollCue).
-  heroScrollCue: string;
   // Decoration only (hidden from screen readers): a ticket for a show tonight.
   heroStub: DatedStub;
   actsEyebrow: string;
@@ -133,7 +134,7 @@ export type AppInfo = {
   closingStub: FixedStub;
 };
 
-// Labels shared by every page: skip link, header, Play badge, footer, terms and contact links.
+// Labels shared by every page: skip link, header, Play badge, footer, terms, account deletion and contact links.
 export const SITE = {
   platform: 'Android',
   skipLink: '본문으로 건너뛰기',
@@ -146,6 +147,7 @@ export const SITE = {
   playTrademark: 'Google Play 및 Google Play 로고는 Google LLC의 상표입니다.',
   privacyPolicy: LEGAL.documents.privacy.name,
   terms: LEGAL.documents.terms.name,
+  accountDeletion: LEGAL.accountDeletion.name,
   contact: '문의하기',
 };
 
@@ -164,6 +166,7 @@ export const YEOUN: AppInfo = {
   // The documents are pages of this site now (src/pages/Legal, src/content/legal), no longer on Notion.
   privacyPolicyUrl: LEGAL.documents.privacy.path,
   termsUrl: LEGAL.documents.terms.path,
+  accountDeletionUrl: LEGAL.accountDeletion.path,
   nav: [
     { href: '#acts', label: '주요 기능' },
     { href: '#archive', label: '더 많은 기능' },
@@ -173,7 +176,6 @@ export const YEOUN: AppInfo = {
   heroLede:
     '관람한 공연의 좌석과 캐스팅, 별점과 감상평을 티켓 한 장에 모아 두세요. 보러 갈 공연은 시작 전에 알려 드려요.',
   heroMore: '주요 기능 보기',
-  heroScrollCue: '아래로 넘겨 보기',
   heroStub: { badge: '오늘', dayOffset: 0, sub: '19:30' },
   actsEyebrow: '주요 기능',
   actsHeading: '공연 하나, 세 장면',
@@ -190,7 +192,7 @@ export const YEOUN: AppInfo = {
       ],
       screenshot: {
         key: 'home',
-        alt: '여운 내 티켓 화면 — 관람하셨나요?, 다가오는 공연 카드 줄, 지난 기록의 티켓 카드',
+        alt: '여운 내 티켓 화면 — 관람하셨나요?, 다가오는 공연 카드 줄, 지난 기록 포스터',
       },
       // The same show as the hero ticket (tonight), seen on the day it was booked: the date stays, the badge counts down.
       stub: { badge: 'D-3', dayOffset: 0, sub: '19:30' },
@@ -208,7 +210,7 @@ export const YEOUN: AppInfo = {
       ],
       screenshot: {
         key: 'detail',
-        alt: '관람 완료 티켓 상세 — 별점, 요일이 붙은 날짜, 장소와 좌석, 캐스팅, 감상평',
+        alt: '관람 완료 티켓 상세 — 별점, 요일이 붙은 날짜, 장소와 좌석, 티켓 가격, 캐스팅, 공연 상세 버튼, 감상평',
       },
       stub: { star: '5.0', dayOffset: 0, sub: '19:30' },
       scene: { kind: 'rating' },
@@ -217,7 +219,7 @@ export const YEOUN: AppInfo = {
       id: 'archive',
       label: '3막 · 다시 꺼내 보는 날',
       titleLines: [ '지난 기록은', '포스터로 쌓여요' ],
-      body: "관람 완료는 '지난 기록'에 달마다 모여요. '포스터로 보기'로 바꾸면 3열 포스터로 한눈에 보고, 같은 작품을 또 보면 N차 관람으로 이어져요.",
+      body: "관람 완료는 '지난 기록'에 달마다 3열 포스터로 모여 한눈에 보여요. 같은 작품을 또 보면 N차 관람으로 이어져요.",
       points: [
         '같은 작품의 회차·좌석·캐스팅·별점을 한 목록에',
         '통계에서 여러 번 본 공연과 관람 패턴까지',
@@ -225,7 +227,7 @@ export const YEOUN: AppInfo = {
       ],
       screenshot: {
         key: 'archive',
-        alt: '내 티켓 관람 완료 — 포스터로 보기, 달마다 포스터 3열',
+        alt: '내 티켓 관람 완료 — 달마다 포스터 3열',
       },
       // The same ticket again, now filed under '관람 완료' (the tab the archive screenshot shows selected).
       stub: { star: '5.0', dayOffset: 0, sub: '관람 완료' },
@@ -246,7 +248,7 @@ export const YEOUN: AppInfo = {
             meta: '인식은 기기 안에서만 해요',
             screenshot: {
               key: 'scan',
-              alt: '티켓 스캔으로 공연명·일시·장소·좌석·티켓 가격이 채워진 티켓 추가 화면',
+              alt: '티켓 스캔으로 채우기 입구와 공연명·카테고리·일시·장소가 채워진 티켓 추가 화면',
             },
           },
           {
@@ -256,7 +258,7 @@ export const YEOUN: AppInfo = {
             meta: '검색 탭',
             screenshot: {
               key: 'search',
-              alt: '검색 탭 — 포스터 2열 결과와 공연 상태, 찜 하트',
+              alt: '검색 탭 — 포스터 2열 결과와 공연 상태, 찜 하트, 내 기록 칩',
             },
           },
           {
@@ -278,11 +280,11 @@ export const YEOUN: AppInfo = {
           {
             icon: 'wishlist',
             title: '찜한 공연',
-            body: "하트로 찜한 공연도 티켓 모양 카드로 모여요. 7일 안에 막을 내리면 스텁에 '종료 D-N'이 붙고, 종료 7일 전 낮 12시에 찜한 공연 종료 알림이 와요.",
+            body: "하트로 찜한 공연은 검색 결과처럼 포스터로 모여요. 7일 안에 막을 내리면 포스터에 '종료 D-N'이 붙고, 종료 7일 전 낮 12시에 찜한 공연 종료 알림이 와요.",
             meta: '내 티켓 · 찜',
             screenshot: {
               key: 'wish',
-              alt: '찜 카드 — 스텁의 종료 D-4, 관람 예정에 추가하는 연필과 찜에서 빼는 하트',
+              alt: '찜 목록 — 포스터 2열, 종료 D-5·공연중·공연예정 배지와 하트, 관람 완료 칩, 관람 예정에 추가 버튼',
             },
           },
           {
@@ -298,11 +300,11 @@ export const YEOUN: AppInfo = {
           {
             icon: 'stats',
             title: '관람 통계',
-            body: '관람 횟수와 관람 비용, 자주 본 배우, 가장 많이 본 요일과 주로 보는 시작 시각까지 돌아봐요.',
+            body: '관람 횟수와 관람 비용, 자주 본 배우, 가장 많이 본 요일·시작 시각과 가장 많이 준 별점까지 돌아보고, 작년 이맘때와도 견줘 봐요.',
             meta: '통계 탭',
             screenshot: {
               key: 'stats',
-              alt: '관람 통계 — 관람 패턴의 요일·시작 시각 막대와 카테고리별 관람 횟수',
+              alt: '관람 통계 — 요일·시작 시각·별점 분포 막대와 카테고리별 관람 횟수',
             },
           },
         ],

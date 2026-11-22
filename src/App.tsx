@@ -6,6 +6,7 @@ import './styles/sections.css';
 import './styles/legal.css';
 import { Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 
+import AccountDeletion from './pages/AccountDeletion';
 import Home from './pages/Home';
 import Legal from './pages/Legal';
 import Yeoun from './pages/Yeoun';
@@ -36,6 +37,8 @@ function App() {
         <Route path="/yeoun/terms/:version" element={ <Legal doc="terms" /> } />
         <Route path="/yeoun/privacy" element={ <Legal doc="privacy" /> } />
         <Route path="/yeoun/privacy/:version" element={ <Legal doc="privacy" /> } />
+        { /* Deleting the account, in the app or by mail without it (legal.json accountDeletion). */ }
+        <Route path="/yeoun/account-deletion" element={ <AccountDeletion /> } />
         <Route path="*" element={ <NotFound /> } />
       </Routes>
       <div className="page-grain" aria-hidden="true" />

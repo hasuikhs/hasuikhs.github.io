@@ -7,7 +7,7 @@ export function ArrowDownIcon() {
   );
 }
 
-// The scroll hint under the stage ticket: a lone chevron, no words.
+// The scroll hint under the hero ticket (components/ScrollHint): a lone chevron, no words.
 export function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={ className } width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">

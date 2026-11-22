@@ -2,6 +2,8 @@
 // `yarn start` and `yarn build`) writes documents.json, which the page shows (src/pages/Legal.tsx); copy-routes.js
 // also writes the same document into each route's served HTML, so it reads without JavaScript.
 // legal.json lists the versions, newest (in force) first; each one is the dated .md file next to it, unchanged.
+// It also names the account deletion guide (account-deletion.md): the site's own page, not a dated document, written
+// to account-deletion.json and served the same way.
 const fs = require('fs');
 const path = require('path');
 
@@ -10,6 +12,7 @@ const LEGAL = require('../src/content/legal/legal.json');
 
 const CONTENT_DIR = path.join(__dirname, '..', 'src', 'content', 'legal');
 const OUTPUT = path.join(CONTENT_DIR, 'documents.json');
+const ACCOUNT_DELETION_OUTPUT = path.join(CONTENT_DIR, 'account-deletion.json');
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -63,9 +66,8 @@ function checkVersions(key, versions) {
   });
 }
 
-// One version: its # title as text, the rest as one HTML string per block. The file's own date line has to
-// name the date it is filed under, so a copy saved under the wrong name fails here.
-function renderDocument(source, date) {
+// A page's blocks split into its one # title (plain text) and the rest.
+function titled(source) {
   const blocks = parse(source);
   const [ title, ...rest ] = blocks;
   if (!title || title.type !== 'heading' || title.depth !== 1) {
@@ -77,6 +79,13 @@ function renderDocument(source, date) {
   if (title.text.includes('**')) {
     throw new Error('legal: the # title is plain text');
   }
+  return { title, rest };
+}
+
+// One version: its # title as text, the rest as one HTML string per block. The file's own date line has to
+// name the date it is filed under, so a copy saved under the wrong name fails here.
+function renderDocument(source, date) {
+  const { title, rest } = titled(source);
   const expected = `시행일: ${formatDate(date)}`;
   const dateLine = rest[0];
   if (!dateLine || dateLine.type !== 'paragraph' || !(dateLine.text === expected || dateLine.text.startsWith(`${expected} `))) {
@@ -112,18 +121,43 @@ function buildDocuments(dir = CONTENT_DIR, legal = LEGAL) {
   return documents;
 }
 
+// The account deletion guide: a # title and the page under it, with no versions or date line.
+function renderGuide(source) {
+  const { title, rest } = titled(source);
+  return { title: joinDots(title.text), blocks: renderBlocks(rest, { text: joinDots }) };
+}
+
+/**
+ * @param {string} [dir]
+ * @param {{ accountDeletion: { source: string } }} [legal]
+ */
+function buildAccountDeletion(dir = CONTENT_DIR, legal = LEGAL) {
+  const { source } = legal.accountDeletion;
+  try {
+    return renderGuide(fs.readFileSync(path.join(dir, source), 'utf8'));
+  } catch (error) {
+    throw new Error(`${source}: ${error.message}`);
+  }
+}
+
 const serialize = (documents) => `${JSON.stringify(documents, null, 2)}\n`;
 
-// Writes documents.json when it changed (an unchanged file keeps its time, so a running dev server stays put).
-function writeDocuments(output = OUTPUT) {
-  const next = serialize(buildDocuments());
+// Writes a file only when it changed (an unchanged file keeps its time, so a running dev server stays put).
+function writeIfChanged(output, next) {
   const current = fs.existsSync(output) ? fs.readFileSync(output, 'utf8') : null;
   if (current !== next) {
     fs.writeFileSync(output, next);
   }
 }
 
+// documents.json and account-deletion.json.
+function writeDocuments(output = OUTPUT, guideOutput = ACCOUNT_DELETION_OUTPUT) {
+  writeIfChanged(output, serialize(buildDocuments()));
+  writeIfChanged(guideOutput, serialize(buildAccountDeletion()));
+}
+
 const readDocuments = () => JSON.parse(fs.readFileSync(OUTPUT, 'utf8'));
+const readAccountDeletion = () => JSON.parse(fs.readFileSync(ACCOUNT_DELETION_OUTPUT, 'utf8'));
 
 // Every route a document is served at, newest version first.
 const legalRoutes = (legal = LEGAL) =>
@@ -136,10 +170,41 @@ const ARROW =
 
 const link = (href, text, attrs = '') => `<a href="${escapeAttr(href)}"${attrs}>${escapeText(text)}</a>`;
 
+// The page's header as the served HTML draws it: the back link to the app page (React adds the theme switch).
+const headerMarkup = (app) => [
+  '<header class="site-header site-header--text"><div class="container site-header__inner">',
+  `<a class="site-header__back" href="${escapeAttr(app.path)}">${ARROW}${escapeText(app.backLabel)}</a>`,
+  '</div></header>',
+].join('');
+
+// The account deletion guide, with the same markup as src/pages/AccountDeletion.tsx: the title, a link to the
+// privacy policy it restates, and the guide. No versions and no notice: it is not a dated document.
+function accountDeletionMarkup(guide, legal) {
+  const { privacy } = legal.documents;
+  return [
+    '<div class="app">',
+    headerMarkup(legal.app),
+    '<main id="main" class="container legal">',
+    '<article class="legal-doc legal-doc--guide">',
+    `<h1 class="legal-doc__title">${escapeText(guide.title)}</h1>`,
+    '<div class="legal-doc__tools">',
+    link(privacy.path, fill(legal.labels.toOther, { name: privacy.name }), ' class="legal-doc__other"'),
+    '</div>',
+    `<div class="legal-doc__body">${guide.blocks.join('')}</div>`,
+    '</article>',
+    '</main>',
+    '</div>',
+  ].join('');
+}
+
 // What a route's served HTML holds in #root before the script runs: the page's header, notice and document,
 // with the same markup as src/pages/Legal.tsx (React replaces it on start, and nothing under the header moves:
-// src/pages/Legal.test.tsx compares the two). '' for a path that is not a legal document.
-function staticMarkup(sitePath, documents = readDocuments(), legal = LEGAL) {
+// src/pages/Legal.test.tsx compares the two); for the account deletion guide, its page (accountDeletionMarkup).
+// '' for any other path.
+function staticMarkup(sitePath, documents = readDocuments(), legal = LEGAL, guide = undefined) {
+  if (legal.accountDeletion && sitePath === legal.accountDeletion.path) {
+    return accountDeletionMarkup(guide || readAccountDeletion(), legal);
+  }
   const route = legalRoutes(legal).find((candidate) => candidate.path === sitePath);
   if (!route) {
     return '';
@@ -163,9 +228,7 @@ function staticMarkup(sitePath, documents = readDocuments(), legal = LEGAL) {
     .map(([ , other ]) => link(other.path, fill(labels.toOther, { name: other.name }), ' class="legal-doc__other"'));
   return [
     '<div class="app">',
-    '<header class="site-header site-header--text"><div class="container site-header__inner">',
-    `<a class="site-header__back" href="${escapeAttr(app.path)}">${ARROW}${escapeText(app.backLabel)}</a>`,
-    '</div></header>',
+    headerMarkup(app),
     '<main id="main" class="container legal">',
     `<div class="legal__notice" role="status">${notice}</div>`,
     '<article class="legal-doc">',
@@ -189,14 +252,17 @@ if (require.main === module) {
 }
 
 module.exports = {
+  ACCOUNT_DELETION_OUTPUT,
   CONTENT_DIR,
   OUTPUT,
+  buildAccountDeletion,
   buildDocuments,
   fill,
   formatDate,
   joinDots,
   legalRoutes,
   renderDocument,
+  renderGuide,
   serialize,
   staticMarkup,
   versionLabel,
